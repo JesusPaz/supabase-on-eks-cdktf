@@ -110,8 +110,8 @@ auth:
       memory: 512Mi
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 10
+    minReplicas: 1
+    maxReplicas: 5
     targetCPUUtilizationPercentage: 70
 
 # REST API (PostgREST) configuration
@@ -142,8 +142,8 @@ rest:
       memory: 512Mi
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 15
+    minReplicas: 1
+    maxReplicas: 8
     targetCPUUtilizationPercentage: 70
 
 # Realtime service configuration
@@ -172,8 +172,8 @@ realtime:
       memory: 512Mi
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 8
+    minReplicas: 1
+    maxReplicas: 5
     targetCPUUtilizationPercentage: 70
 
 # Meta service configuration
@@ -242,8 +242,8 @@ storage:
       memory: 512Mi
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 6
+    minReplicas: 1
+    maxReplicas: 4
     targetCPUUtilizationPercentage: 70
 
 # Image Proxy configuration
@@ -303,8 +303,8 @@ kong:
       memory: 512Mi
   autoscaling:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 5
+    minReplicas: 1
+    maxReplicas: 3
     targetCPUUtilizationPercentage: 70
 
 # Analytics configuration
