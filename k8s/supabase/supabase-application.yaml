@@ -56,8 +56,62 @@ spec:
         studio:
           enabled: true
           replicaCount: 1
+          image:
+            repository: supabase/studio
+            tag: "2025.09.15-sha-6cff20b"
+            pullPolicy: IfNotPresent
           environment:
+            # Studio configuration
+            STUDIO_DEFAULT_ORGANIZATION: "Default Organization"
+            STUDIO_DEFAULT_PROJECT: "Default Project"
+            STUDIO_PORT: "3000"
             SUPABASE_PUBLIC_URL: "https://supabase.stack-ai.jesuspaz.com"
+            NEXT_PUBLIC_ENABLE_LOGS: "true"
+            NEXT_ANALYTICS_BACKEND_PROVIDER: "postgres"
+          env:
+            # Database connection from External Secrets
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: host
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: password
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: database
+            # JWT secrets from External Secrets
+            - name: SUPABASE_ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-jwt-secret
+                  key: anon-key
+            - name: SUPABASE_SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-jwt-secret
+                  key: service-key
+            # Dashboard credentials from External Secrets
+            - name: STUDIO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-dashboard-secret
+                  key: username
+            - name: STUDIO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-dashboard-secret
+                  key: password
           resources:
             requests:
               cpu: 100m
