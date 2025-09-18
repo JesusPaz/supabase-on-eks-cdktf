@@ -1,0 +1,130 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: supabase
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://supabase.github.io/supabase-kubernetes
+    chart: supabase
+    targetRevision: "0.1.4"  # Check latest version
+    helm:
+      values: |
+        # Global configuration
+        global:
+          domain: "supabase.stack-ai.jesuspaz.com"
+        
+        # Database configuration (External RDS)
+        db:
+          enabled: false  # We use external RDS
+          external:
+            enabled: true
+            host: ""  # Will be populated by External Secrets
+            port: 5432
+            database: "supabase"
+            username: ""  # Will be populated by External Secrets
+            password: ""  # Will be populated by External Secrets
+        
+        # Storage configuration (External S3)
+        storage:
+          enabled: true
+          persistence:
+            enabled: false  # We use S3
+          environment:
+            STORAGE_BACKEND: s3
+            AWS_DEFAULT_REGION: us-east-1
+            GLOBAL_S3_BUCKET: ""  # Will be populated by External Secrets
+            GLOBAL_S3_PROTOCOL: https
+            GLOBAL_S3_FORCE_PATH_STYLE: false
+        
+        # Service Account with IRSA
+        serviceAccount:
+          create: true
+          name: supabase-app
+          annotations:
+            eks.amazonaws.com/role-arn: ""  # Will be populated by Terraform output
+        
+        # Ingress configuration
+        kong:
+          ingress:
+            enabled: true
+            className: "alb"
+            annotations:
+              kubernetes.io/ingress.class: alb
+              alb.ingress.kubernetes.io/scheme: internet-facing
+              alb.ingress.kubernetes.io/target-type: ip
+              alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+              alb.ingress.kubernetes.io/ssl-redirect: '443'
+            hosts:
+              - host: supabase.stack-ai.jesuspaz.com
+                paths:
+                  - path: /
+                    pathType: Prefix
+        
+        # Security configuration
+        secret:
+          jwt:
+            anonKey: ""     # From AWS Secrets Manager
+            serviceKey: ""  # From AWS Secrets Manager
+            secret: ""      # From AWS Secrets Manager
+          db:
+            username: ""    # From AWS Secrets Manager
+            password: ""    # From AWS Secrets Manager
+            database: "supabase"
+          analytics:
+            apiKey: ""      # From AWS Secrets Manager
+          dashboard:
+            username: "supabase"
+            password: ""    # From AWS Secrets Manager
+        
+        # Resource limits
+        resources:
+          auth:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          rest:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          realtime:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          storage:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          kong:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: supabase
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
