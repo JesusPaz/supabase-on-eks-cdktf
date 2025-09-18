@@ -20,15 +20,26 @@ This chart uses **External Secrets Operator** to fetch secrets from **AWS Secret
 
 ## 🚀 Deployment
 
-### Option 1: ArgoCD Application (Recommended)
+### Option 1: ArgoCD Application (Git Repository)
 ```bash
 kubectl apply -f supabase-application.yaml
 ```
+*Note: Uses GitHub repository directly since there's no official Helm repository*
 
-### Option 2: Direct Helm
+### Option 2: Direct Helm (Local Chart)
 ```bash
-helm repo add supabase https://supabase.github.io/supabase-kubernetes
-helm install supabase supabase/supabase -f values.yaml -n supabase --create-namespace
+./deploy-supabase.sh
+```
+*This script clones the repository and deploys using local chart*
+
+### Option 3: Manual Helm
+```bash
+# Clone the repository
+git clone https://github.com/supabase-community/supabase-kubernetes
+cd supabase-kubernetes/charts/supabase/
+
+# Install with custom values
+helm install supabase . -f /path/to/your/values.yaml -n supabase --create-namespace
 ```
 
 ## 🔧 Configuration

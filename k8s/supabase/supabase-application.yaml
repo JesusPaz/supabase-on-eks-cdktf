@@ -8,47 +8,190 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://supabase.github.io/supabase-kubernetes
-    chart: supabase
-    targetRevision: "0.1.4"  # Check latest version
+    repoURL: https://github.com/supabase-community/supabase-kubernetes
+    path: charts/supabase
+    targetRevision: HEAD  # Use latest from main branch
     helm:
       values: |
-        # Global configuration
-        global:
-          domain: "supabase.stack-ai.jesuspaz.com"
+        # Security configuration - Using External Secrets from AWS Secrets Manager
+        secret:
+          jwt:
+            # These will be populated by External Secrets
+            secretRef: "supabase-jwt-secret"
+            secretRefKey:
+              anonKey: "anon-key"
+              serviceKey: "service-key"
+              secret: "jwt-secret"
+          db:
+            # These will be populated by External Secrets
+            secretRef: "supabase-db-secret"
+            secretRefKey:
+              username: "username"
+              password: "password"
+              database: "database"
+          analytics:
+            # This will be populated by External Secrets
+            secretRef: "supabase-analytics-secret"
+            secretRefKey:
+              apiKey: "api-key"
+          dashboard:
+            # These will be populated by External Secrets
+            secretRef: "supabase-dashboard-secret"
+            secretRefKey:
+              username: "username"
+              password: "password"
+          s3:
+            # S3 access via IRSA (no keys needed)
+            secretRef: "supabase-s3-secret"
+            secretRefKey:
+              keyId: "access-key-id"  # Not used with IRSA
+              accessKey: "secret-access-key"  # Not used with IRSA
         
         # Database configuration (External RDS)
         db:
-          enabled: false  # We use external RDS
-          external:
-            enabled: true
-            host: ""  # Will be populated by External Secrets
-            port: 5432
-            database: "supabase"
-            username: ""  # Will be populated by External Secrets
-            password: ""  # Will be populated by External Secrets
+          enabled: false  # Using external RDS PostgreSQL
+          # External database connection will be handled by External Secrets
         
-        # Storage configuration (External S3)
+        # Studio configuration
+        studio:
+          enabled: true
+          replicaCount: 1
+          environment:
+            SUPABASE_PUBLIC_URL: "https://supabase.stack-ai.jesuspaz.com"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 1
+            maxReplicas: 3
+            targetCPUUtilizationPercentage: 80
+        
+        # Auth service configuration
+        auth:
+          enabled: true
+          replicaCount: 2
+          environment:
+            API_EXTERNAL_URL: "https://supabase.stack-ai.jesuspaz.com"
+            GOTRUE_SITE_URL: "https://supabase.stack-ai.jesuspaz.com"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 2
+            maxReplicas: 10
+            targetCPUUtilizationPercentage: 70
+        
+        # REST API (PostgREST) configuration
+        rest:
+          enabled: true
+          replicaCount: 2
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 2
+            maxReplicas: 15
+            targetCPUUtilizationPercentage: 70
+        
+        # Realtime service configuration
+        realtime:
+          enabled: true
+          replicaCount: 2
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 2
+            maxReplicas: 8
+            targetCPUUtilizationPercentage: 70
+        
+        # Meta service configuration
+        meta:
+          enabled: true
+          replicaCount: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 1
+            maxReplicas: 3
+            targetCPUUtilizationPercentage: 80
+        
+        # Storage service configuration (S3 backend)
         storage:
           enabled: true
-          persistence:
-            enabled: false  # We use S3
+          replicaCount: 2
           environment:
             STORAGE_BACKEND: s3
             AWS_DEFAULT_REGION: us-east-1
-            GLOBAL_S3_BUCKET: ""  # Will be populated by External Secrets
             GLOBAL_S3_PROTOCOL: https
             GLOBAL_S3_FORCE_PATH_STYLE: false
+          serviceAccount:
+            create: true
+            name: supabase-storage
+            annotations:
+              eks.amazonaws.com/role-arn: "arn:aws:iam::851725652296:role/supabase-on-eks-app-s3-20250918044322522300000007"
+          persistence:
+            enabled: false  # Using S3, not local storage
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 2
+            maxReplicas: 6
+            targetCPUUtilizationPercentage: 70
         
-        # Service Account with IRSA
-        serviceAccount:
-          create: true
-          name: supabase-app
-          annotations:
-            eks.amazonaws.com/role-arn: ""  # Will be populated by Terraform output
+        # Image Proxy configuration
+        imgproxy:
+          enabled: true
+          replicaCount: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 1
+            maxReplicas: 3
+            targetCPUUtilizationPercentage: 80
         
-        # Ingress configuration
+        # Kong Gateway configuration
         kong:
+          enabled: true
+          replicaCount: 2
           ingress:
             enabled: true
             className: "alb"
@@ -63,60 +206,73 @@ spec:
                 paths:
                   - path: /
                     pathType: Prefix
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 2
+            maxReplicas: 5
+            targetCPUUtilizationPercentage: 70
         
-        # Security configuration
-        secret:
-          jwt:
-            anonKey: ""     # From AWS Secrets Manager
-            serviceKey: ""  # From AWS Secrets Manager
-            secret: ""      # From AWS Secrets Manager
-          db:
-            username: ""    # From AWS Secrets Manager
-            password: ""    # From AWS Secrets Manager
-            database: "supabase"
-          analytics:
-            apiKey: ""      # From AWS Secrets Manager
-          dashboard:
-            username: "supabase"
-            password: ""    # From AWS Secrets Manager
+        # Analytics configuration
+        analytics:
+          enabled: true
+          replicaCount: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 1
+            maxReplicas: 3
+            targetCPUUtilizationPercentage: 80
         
-        # Resource limits
-        resources:
-          auth:
+        # Vector configuration
+        vector:
+          enabled: true
+          replicaCount: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 1
+            maxReplicas: 2
+            targetCPUUtilizationPercentage: 80
+        
+        # Functions configuration
+        functions:
+          enabled: true
+          replicaCount: 1
+          resources:
             requests:
               cpu: 100m
               memory: 128Mi
             limits:
               cpu: 500m
               memory: 256Mi
-          rest:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 256Mi
-          realtime:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 256Mi
-          storage:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 256Mi
-          kong:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 256Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 1
+            maxReplicas: 5
+            targetCPUUtilizationPercentage: 80
+        
+        # Minio configuration (disabled - using S3)
+        minio:
+          enabled: false
 
   destination:
     server: https://kubernetes.default.svc
