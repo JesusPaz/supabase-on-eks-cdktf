@@ -81,6 +81,7 @@ auth:
     DB_DRIVER: "postgres"
     DB_SSL: "disable"
     DB_USER: "supabase_auth_admin"
+    # DB_HOST will be injected from External Secrets, but keeping for init containers
     DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
     API_EXTERNAL_URL: "https://supabase.stack-ai.jesuspaz.com"
     GOTRUE_API_HOST: "0.0.0.0"
@@ -126,6 +127,7 @@ rest:
     DB_PORT: "5432"
     DB_DRIVER: "postgres"
     DB_SSL: "disable"
+    # DB_HOST will be injected from External Secrets, but keeping for init containers
     DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
     PGRST_DB_SCHEMAS: "public,storage,graphql_public"
     PGRST_DB_ANON_ROLE: "anon"
@@ -157,6 +159,7 @@ realtime:
     DB_PORT: "5432"
     DB_DRIVER: "postgres"
     DB_SSL: "disable"
+    # DB_HOST will be injected from External Secrets, but keeping for init containers
     DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
     DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
     PORT: "4000"
@@ -220,6 +223,7 @@ storage:
     DB_PORT: "5432"
     DB_DRIVER: "postgres"
     DB_SSL: "disable"
+    # DB_HOST will be injected from External Secrets, but keeping for init containers
     DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
     PGOPTIONS: "-c search_path=storage,public"
   serviceAccount:
@@ -320,6 +324,7 @@ analytics:
     LOGFLARE_SINGLE_TENANT: "true"
     LOGFLARE_SUPABASE_MODE: "true"
     FEATURE_FLAG_OVERRIDE: "multibackend=true"
+    # DB_HOST will be injected from External Secrets, but keeping for init containers
     DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
   resources:
     requests:
@@ -368,6 +373,7 @@ functions:
     DB_PORT: "5432"
     DB_DRIVER: "postgresql"
     DB_SSL: "disable"
+    # DB_HOST will be injected from External Secrets, but keeping for init containers
     DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
   resources:
     requests:
