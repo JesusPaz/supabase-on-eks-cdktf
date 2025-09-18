@@ -129,6 +129,38 @@ spec:
         meta:
           enabled: true
           replicaCount: 1
+          image:
+            repository: supabase/postgres-meta
+            tag: "v0.91.6"
+            pullPolicy: IfNotPresent
+          environment:
+            # Database connection configuration
+            PG_META_PORT: "8080"
+            DB_PORT: "5432"
+            DB_DRIVER: "postgres"
+            DB_SSL: "disable"
+          env:
+            # Database connection from External Secrets
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: host
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: password
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: database
           resources:
             requests:
               cpu: 100m
@@ -260,6 +292,10 @@ spec:
         functions:
           enabled: true
           replicaCount: 1
+          image:
+            repository: supabase/edge-runtime
+            tag: "v1.58.2"  # Specific version tag
+            pullPolicy: IfNotPresent
           resources:
             requests:
               cpu: 100m
