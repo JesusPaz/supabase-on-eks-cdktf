@@ -23,13 +23,13 @@ class Eks(Construct):
             "eks",
             source="terraform-aws-modules/eks/aws",
         )
-        self.eks.add_override("cluster_name", cluster_name)
-        self.eks.add_override("cluster_version", cluster_version)
+        self.eks.add_override("name", cluster_name)
+        self.eks.add_override("kubernetes_version", cluster_version)
         self.eks.add_override("vpc_id", vpc_id)
         self.eks.add_override("subnet_ids", private_subnet_ids)
         self.eks.add_override("enable_irsa", True)
-        self.eks.add_override("cluster_endpoint_public_access", False)
-        self.eks.add_override("cluster_endpoint_private_access", True)
+        self.eks.add_override("endpoint_public_access", False)
+        self.eks.add_override("endpoint_private_access", True)
         self.eks.add_override(
             "eks_managed_node_groups",
             {
@@ -47,14 +47,15 @@ class Eks(Construct):
                 }
             },
         )
+        self.eks.add_override("cloudwatch_log_group_retention_in_days", 7)
         self.eks.add_override(
-            "cluster_enabled_log_types",
+            "enabled_log_types",
             ["api", "audit", "authenticator", "controllerManager", "scheduler"],
         )
         if kms_key_arn_for_secrets:
             self.eks.add_override(
-                "cluster_encryption_config",
-                [{"resources": ["secrets"], "provider_key_arn": kms_key_arn_for_secrets}],
+                "encryption_config",
+                {"resources": ["secrets"], "provider_key_arn": kms_key_arn_for_secrets},
             )
         self.eks.add_override("tags", tags or {"Project": "supabase-on-eks", "ManagedBy": "cdktf"})
 
