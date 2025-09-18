@@ -13,6 +13,40 @@ spec:
     targetRevision: HEAD  # Use latest from main branch
     helm:
       values: |
+        # Security configuration - Using External Secrets from AWS Secrets Manager
+        secret:
+          jwt:
+            # These will be populated by External Secrets
+            secretRef: "supabase-jwt-secret"
+            secretRefKey:
+              anonKey: "anon-key"
+              serviceKey: "service-key"
+              secret: "jwt-secret"
+          db:
+            # These will be populated by External Secrets
+            secretRef: "supabase-db"
+            secretRefKey:
+              username: "username"
+              password: "password"
+              database: "database"
+          analytics:
+            # This will be populated by External Secrets
+            secretRef: "supabase-analytics-secret"
+            secretRefKey:
+              apiKey: "api-key"
+          dashboard:
+            # These will be populated by External Secrets
+            secretRef: "supabase-dashboard-secret"
+            secretRefKey:
+              username: "username"
+              password: "password"
+          s3:
+            # S3 access via IRSA (no keys needed)
+            secretRef: "supabase-s3-secret"
+            secretRefKey:
+              keyId: "access-key-id"  # Not used with IRSA
+              accessKey: "secret-access-key"  # Not used with IRSA
+        
         # Database configuration (External RDS)
         db:
           enabled: false  # Using external RDS PostgreSQL
@@ -39,22 +73,22 @@ spec:
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: host
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: username
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: password
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: database
             # JWT secrets from External Secrets
             - name: SUPABASE_ANON_KEY
@@ -104,10 +138,13 @@ spec:
             repository: supabase/gotrue
             tag: "v2.179.0"
             pullPolicy: IfNotPresent
+          initContainers:
+            enabled: false
           environment:
             DB_PORT: "5432"
             DB_DRIVER: "postgres"
             DB_SSL: "disable"
+            DB_USER: "supabase_auth_admin"
             API_EXTERNAL_URL: "https://supabase.stack-ai.jesuspaz.com"
             GOTRUE_API_HOST: "0.0.0.0"
             GOTRUE_API_PORT: "9999"
@@ -131,22 +168,22 @@ spec:
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: host
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: username
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: password
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: database
             # JWT secrets from External Secrets
             - name: GOTRUE_JWT_SECRET
@@ -189,17 +226,17 @@ spec:
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: host
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: password
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: database
             # JWT secrets from External Secrets
             - name: PGRST_JWT_SECRET
@@ -240,17 +277,17 @@ spec:
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: host
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: password
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: database
             # JWT secrets from External Secrets
             - name: SECRET_KEY_BASE
@@ -295,22 +332,22 @@ spec:
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: host
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: username
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: password
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: database
           resources:
             requests:
@@ -351,17 +388,17 @@ spec:
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: host
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: password
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: database
             # S3 bucket name from External Secrets
             - name: GLOBAL_S3_BUCKET
@@ -478,17 +515,17 @@ spec:
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: host
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: password
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: database
             # Analytics API key from External Secrets
             - name: LOGFLARE_API_KEY
@@ -548,17 +585,17 @@ spec:
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: host
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: password
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: supabase-db-secret
+                  name: supabase-db
                   key: database
           resources:
             requests:
