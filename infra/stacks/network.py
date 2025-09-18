@@ -11,7 +11,6 @@ class Network(Construct):
             self,
             "vpc",
             source="terraform-aws-modules/vpc/aws",
-            version="~> 5.0",
         )
         self.vpc.add_override("name", vpc_name)
         self.vpc.add_override("cidr", "10.0.0.0/16")

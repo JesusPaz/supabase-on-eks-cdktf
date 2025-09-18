@@ -31,7 +31,6 @@ class IamRoles(Construct):
             self,
             "eso_secrets_ro_policy",
             source="terraform-aws-modules/iam/aws//modules/iam-policy",
-            version="~> 5.0",
         )
         eso_policy.add_override("name", f"{cluster_name}-eso-secrets-ro")
         eso_policy.add_override("path", "/")
@@ -69,7 +68,6 @@ class IamRoles(Construct):
             self,
             "app_s3_policy",
             source="terraform-aws-modules/iam/aws//modules/iam-policy",
-            version="~> 5.0",
         )
         s3_policy.add_override("name", f"{cluster_name}-app-s3-access")
         s3_policy.add_override("path", "/")

@@ -22,7 +22,6 @@ class Eks(Construct):
             self,
             "eks",
             source="terraform-aws-modules/eks/aws",
-            version="~> 20.0",
         )
         self.eks.add_override("cluster_name", cluster_name)
         self.eks.add_override("cluster_version", cluster_version)

@@ -19,7 +19,6 @@ class Rds(Construct):
             self,
             "rds",
             source="terraform-aws-modules/rds/aws",
-            version="~> 6.0",
         )
         self.rds.add_override("identifier", db_name)
         self.rds.add_override("engine", "postgres")
