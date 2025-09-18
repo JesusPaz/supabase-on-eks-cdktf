@@ -27,11 +27,14 @@ class Secrets(Construct):
         )
 
         # Database secrets (all in one secret as JSON)
+        # Extract hostname from RDS endpoint (remove port if present)
+        db_host = db_endpoint.split(":")[0] if db_endpoint and ":" in db_endpoint else db_endpoint if db_endpoint else "CHANGE_ME_DB_HOST"
+        
         db_secrets = {
             "username": "supabase",
             "password": "CHANGE_ME_DB_PASSWORD",
             "database": "supabase",
-            "host": db_endpoint.split(":")[0] if db_endpoint else "CHANGE_ME_DB_HOST"  # Only hostname, no port
+            "host": db_host
         }
         ManagedSecret(
             self, 
