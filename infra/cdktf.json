@@ -1,0 +1,20 @@
+{
+  "language": "python",
+  "app": "python main.py",
+  "projectId": "supabase-on-eks-cdktf",
+  "terraformProviders": [
+    "hashicorp/aws@~> 6.13",
+    "hashicorp/random@~> 3.7",
+    "hashicorp/local@~> 2.5"
+  ],
+  "terraformModules": [
+    "terraform-aws-modules/vpc/aws@~> 6.0",
+    "terraform-aws-modules/eks/aws@~> 21.3",
+    "terraform-aws-modules/rds/aws@~> 6.12",
+    "terraform-aws-modules/iam/aws@~> 6.2"
+  ],
+  "context": {
+    "excludeStackIdFromLogicalIds": "true",
+    "allowSepCharsInLogicalIds": "true"
+  }
+}
