@@ -28,8 +28,9 @@ class Eks(Construct):
         self.eks.add_override("vpc_id", vpc_id)
         self.eks.add_override("subnet_ids", private_subnet_ids)
         self.eks.add_override("enable_irsa", True)
-        self.eks.add_override("endpoint_public_access", False)
+        self.eks.add_override("endpoint_public_access", True)
         self.eks.add_override("endpoint_private_access", True)
+        self.eks.add_override("enable_cluster_creator_admin_permissions", True)
         self.eks.add_override(
             "eks_managed_node_groups",
             {

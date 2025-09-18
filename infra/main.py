@@ -84,7 +84,7 @@ class InfraStack(TerraformStack):
         bucket = StorageBucket(self, "storage", bucket_prefix=f"{project}-storage-", use_kms=True, kms_key_arn=kms.s3_key_arn, tags=tags)
 
         # IAM roles and IRSA bindings (ALB Controller, External Secrets, App S3)
-        IamRoles(
+        iam_roles = IamRoles(
             self,
             "iam",
             oidc_provider_arn=eks.oidc_provider_arn,
@@ -105,6 +105,9 @@ class InfraStack(TerraformStack):
         TerraformOutput(self, "db_master_user_secret_arn", value=rds.master_user_secret_arn)
         TerraformOutput(self, "cluster_name", value=eks.cluster_name)
         TerraformOutput(self, "kubeconfig_path", value=eks.kubeconfig_path)
+        TerraformOutput(self, "alb_controller_role_arn", value=iam_roles.alb_controller.role_arn)
+        TerraformOutput(self, "external_secrets_role_arn", value=iam_roles.external_secrets.role_arn)
+        TerraformOutput(self, "app_s3_role_arn", value=iam_roles.app_role.role_arn)
 
 
 app = App()
