@@ -95,7 +95,12 @@ class InfraStack(TerraformStack):
         )
 
         # App-level secrets placeholders (JWT, anon, service role)
-        Secrets(self, "secrets")
+        Secrets(
+            self, 
+            "secrets", 
+            db_endpoint=rds.db_endpoint,
+            s3_bucket_name=bucket.bucket_name
+        )
 
         # Outputs
         TerraformOutput(self, "s3_bucket_name", value=bucket.bucket_name)
