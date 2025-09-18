@@ -74,10 +74,55 @@ spec:
         # Auth service configuration
         auth:
           enabled: true
-          replicaCount: 2
+          replicaCount: 1
+          image:
+            repository: supabase/gotrue
+            tag: "v2.179.0"
+            pullPolicy: IfNotPresent
           environment:
+            DB_PORT: "5432"
+            DB_DRIVER: "postgres"
+            DB_SSL: "disable"
             API_EXTERNAL_URL: "https://supabase.stack-ai.jesuspaz.com"
             GOTRUE_SITE_URL: "https://supabase.stack-ai.jesuspaz.com"
+          env:
+            # Database connection from External Secrets
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: host
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: password
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-secret
+                  key: database
+            # JWT secrets from External Secrets
+            - name: GOTRUE_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-jwt-secret
+                  key: jwt-secret
+            - name: GOTRUE_JWT_ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-jwt-secret
+                  key: anon-key
+            - name: GOTRUE_JWT_SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-jwt-secret
+                  key: service-key
           resources:
             requests:
               cpu: 200m

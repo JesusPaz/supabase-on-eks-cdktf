@@ -31,7 +31,7 @@ class Secrets(Construct):
             "username": "supabase",
             "password": "CHANGE_ME_DB_PASSWORD",
             "database": "supabase",
-            "host": db_endpoint.split(":")[0] if db_endpoint else "CHANGE_ME_DB_HOST"
+            "host": db_endpoint.split(":")[0] if db_endpoint else "CHANGE_ME_DB_HOST"  # Only hostname, no port
         }
         ManagedSecret(
             self, 
