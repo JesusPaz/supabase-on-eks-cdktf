@@ -112,6 +112,7 @@ class InfraStack(TerraformStack):
         TerraformOutput(self, "kubeconfig_path", value=eks.kubeconfig_path)
         TerraformOutput(self, "alb_controller_role_arn", value=iam_roles.alb_controller.role_arn)
         TerraformOutput(self, "external_secrets_role_arn", value=iam_roles.external_secrets.role_arn)
+        TerraformOutput(self, "ebs_csi_driver_role_arn", value=iam_roles.ebs_csi_driver.role_arn)
         TerraformOutput(self, "app_s3_role_arn", value=iam_roles.app_role.role_arn)
 
 

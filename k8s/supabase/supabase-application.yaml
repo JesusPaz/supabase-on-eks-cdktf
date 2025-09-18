@@ -199,8 +199,11 @@ spec:
               kubernetes.io/ingress.class: alb
               alb.ingress.kubernetes.io/scheme: internet-facing
               alb.ingress.kubernetes.io/target-type: ip
-              alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+              alb.ingress.kubernetes.io/group.name: production
+              alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
               alb.ingress.kubernetes.io/ssl-redirect: '443'
+              alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:851725652296:certificate/448e98db-b7cd-4efb-b8d0-94bdf6fb2c6a
+              alb.ingress.kubernetes.io/subnets: subnet-0f3b48174c8c02281,subnet-0e0a131d3c91fd408,subnet-041db689b2eec84e7
             hosts:
               - host: supabase.stack-ai.jesuspaz.com
                 paths:
@@ -268,6 +271,25 @@ spec:
             enabled: true
             minReplicas: 1
             maxReplicas: 5
+            targetCPUUtilizationPercentage: 80
+        
+        # Image Proxy configuration
+        imgproxy:
+          enabled: true
+          replicaCount: 1
+          persistence:
+            enabled: false  # Imgproxy doesn't need persistent storage
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          autoscaling:
+            enabled: true
+            minReplicas: 1
+            maxReplicas: 3
             targetCPUUtilizationPercentage: 80
         
         # Minio configuration (disabled - using S3)

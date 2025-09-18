@@ -15,6 +15,7 @@ class IrsaRole(Construct):
         service_account_name: str,
         policy_arns: List[str] | None = None,
         attach_load_balancer_controller_policy: bool = False,
+        attach_ebs_csi_policy: bool = False,
     ) -> None:
         super().__init__(scope, id)
 
@@ -36,6 +37,8 @@ class IrsaRole(Construct):
             self.module.add_override("policies", {f"policy_{i}": arn for i, arn in enumerate(policy_arns)})
         if attach_load_balancer_controller_policy:
             self.module.add_override("attach_load_balancer_controller_policy", True)
+        if attach_ebs_csi_policy:
+            self.module.add_override("attach_ebs_csi_policy", True)
 
     @property
     def role_arn(self) -> str:

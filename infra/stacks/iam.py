@@ -95,3 +95,15 @@ class IamRoles(Construct):
             service_account_name="supabase-app",
             policy_arns=[s3_policy.get_string("arn")],
         )
+
+        # EBS CSI Driver IRSA role for volume provisioning
+        self.ebs_csi_driver = IrsaRole(
+            self,
+            "ebs_csi_driver",
+            role_name=f"{cluster_name}-ebs-csi-driver",
+            oidc_provider_arn=oidc_provider_arn,
+            oidc_provider_url=oidc_provider_url,
+            namespace="kube-system",
+            service_account_name="ebs-csi-controller-sa",
+            attach_ebs_csi_policy=True,
+        )
