@@ -112,6 +112,11 @@ spec:
                 secretKeyRef:
                   name: supabase-dashboard-secret
                   key: password
+            - name: LOGFLARE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-analytics-secret
+                  key: logflare_api_key
           resources:
             requests:
               cpu: 100m
