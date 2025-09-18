@@ -1,5 +1,5 @@
 from constructs import Construct
-from cdktf import App, TerraformStack, TerraformOutput
+from cdktf import App, TerraformStack, TerraformOutput, S3Backend
 from cdktf_cdktf_provider_aws.provider import AwsProvider
 
 # Stacks / Constructs
@@ -22,6 +22,15 @@ class InfraStack(TerraformStack):
         region = "us-east-1"
         project = "supabase-on-eks"
         environment = "prod"
+
+        # Configure S3 backend
+        S3Backend(
+            self,
+            bucket="jesuspaz-terraform-state",
+            key="supabase-on-eks/terraform.tfstate",
+            region=region,
+            encrypt=True
+        )
 
         AwsProvider(self, "aws", region=region)
 
