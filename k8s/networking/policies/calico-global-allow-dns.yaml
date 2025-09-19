@@ -1,0 +1,45 @@
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: allow-dns-everywhere
+spec:
+  # Apply to all pods in all namespaces
+  selector: all()
+  types:
+  - Egress
+  egress:
+  # Allow DNS resolution to any destination
+  - action: Allow
+    protocol: UDP
+    destination:
+      ports:
+      - 53
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports:
+      - 53
+  # Allow access to RDS (external database)
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports:
+      - 5432
+  # Allow HTTPS for external services
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports:
+      - 443
+  # Allow HTTP for internal services
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports:
+      - 80
+      - 8000
+      - 8080
+      - 9999
+      - 3000
+      - 4000
+      - 5000

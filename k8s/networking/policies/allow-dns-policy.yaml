@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: supabase
+  labels:
+    app.kubernetes.io/name: allow-dns
+spec:
+  podSelector: {}  # Apply to all pods in supabase namespace
+  policyTypes:
+  - Egress
+  egress:
+  # Allow ALL egress traffic (more permissive to ensure connectivity)
+  # Based on research: Calico policy-only can be restrictive by default
+  # This ensures DNS and external services work correctly
+  - to: []

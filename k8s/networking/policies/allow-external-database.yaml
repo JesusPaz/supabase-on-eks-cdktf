@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-external-database
+  namespace: supabase
+  labels:
+    app.kubernetes.io/name: allow-external-database
+spec:
+  podSelector: {}  # Apply to all pods in supabase namespace
+  policyTypes:
+  - Egress
+  egress:
+  # Allow access to external RDS database
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow HTTPS for AWS services (S3, STS, etc.)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443

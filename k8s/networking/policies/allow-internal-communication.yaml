@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-internal-communication
+  namespace: supabase
+  labels:
+    app.kubernetes.io/name: allow-internal-communication
+spec:
+  podSelector: {}  # Apply to all pods in supabase namespace
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from any pod in supabase namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: supabase
+  # Allow traffic from ALB/internet (for Kong)
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 8000
+  egress:
+  # Allow communication to any pod in supabase namespace
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: supabase
