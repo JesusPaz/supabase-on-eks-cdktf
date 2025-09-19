@@ -75,30 +75,16 @@ studio:
   replicaCount: 1
   image:
     repository: supabase/studio
-    tag: "2025.09.15-sha-6cff20b"
+    tag: "2025.06.30-sha-6f5982d"
     pullPolicy: IfNotPresent
   environment:
-    STUDIO_DEFAULT_ORGANIZATION: "Default Organization"
-    STUDIO_DEFAULT_PROJECT: "Default Project" 
+    # Official docker-compose configuration
+    DEFAULT_ORGANIZATION_NAME: "Default Organization"
+    DEFAULT_PROJECT_NAME: "Default Project"
     STUDIO_PORT: "3000"
     SUPABASE_PUBLIC_URL: "https://supabase.stack-ai.jesuspaz.com"
     NEXT_PUBLIC_ENABLE_LOGS: "true"
     NEXT_ANALYTICS_BACKEND_PROVIDER: "postgres"
-    # Self-hosted configuration
-    NEXT_PUBLIC_IS_PLATFORM: "false"
-    NEXT_PUBLIC_ENVIRONMENT: "local" 
-    NEXT_PUBLIC_API_URL: "https://supabase.stack-ai.jesuspaz.com"
-    # Disable Platform features
-    NEXT_PUBLIC_DISABLE_PLATFORM: "true"
-    NEXT_PUBLIC_HOSTED_PLATFORM: "false"
-    # Override default project and org
-    DEFAULT_PROJECT_ID: "default"
-    DEFAULT_ORGANIZATION_ID: "default-org-slug"
-    # Additional self-hosted settings
-    NEXT_PUBLIC_GOTRUE_URL: "https://supabase.stack-ai.jesuspaz.com/auth/v1"
-    NEXT_PUBLIC_REST_URL: "https://supabase.stack-ai.jesuspaz.com/rest/v1"
-    NEXT_PUBLIC_REALTIME_URL: "wss://supabase.stack-ai.jesuspaz.com/realtime/v1"
-    NEXT_PUBLIC_STORAGE_URL: "https://supabase.stack-ai.jesuspaz.com/storage/v1"
   serviceAccount:
     create: true
     annotations: {}
@@ -125,7 +111,7 @@ auth:
   replicaCount: 1
   image:
     repository: supabase/gotrue
-    tag: "v2.179.0"
+    tag: "v2.177.0"
     pullPolicy: IfNotPresent
   serviceAccount:
     create: true
@@ -180,7 +166,7 @@ rest:
   replicaCount: 1
   image:
     repository: postgrest/postgrest
-    tag: "v12.0.2"
+    tag: "v12.2.12"
     pullPolicy: IfNotPresent
   serviceAccount:
     create: true
@@ -216,7 +202,7 @@ realtime:
   replicaCount: 1
   image:
     repository: supabase/realtime
-    tag: "v2.20.0"
+    tag: "v2.34.47"
     pullPolicy: IfNotPresent
   serviceAccount:
     create: true
@@ -226,13 +212,18 @@ realtime:
     DB_PORT: "5432"
     DB_DRIVER: "postgres"
     DB_SSL: "disable"
-    DB_AFTER_CONNECT_QUERY: "SET search_path TO realtime"
+    DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
     PORT: "4000"
     FLY_ALLOC_ID: "fly123"
     FLY_APP_NAME: "realtime"
     ERL_AFLAGS: "-proto_dist inet_tcp"
     ENABLE_TAILSCALE: "false"
     DNS_NODES: "''"
+    # Official docker-compose variables
+    DB_ENC_KEY: "supabaserealtime"
+    SEED_SELF_HOST: "true"
+    RUN_JANITOR: "true"
+    APP_NAME: "realtime"
   service:
     type: ClusterIP
     port: 4000
@@ -288,7 +279,7 @@ storage:
   replicaCount: 1
   image:
     repository: supabase/storage-api
-    tag: "v0.43.0"
+    tag: "v1.25.7"
     pullPolicy: IfNotPresent
   environment:
     DB_PORT: "5432"
@@ -305,7 +296,11 @@ storage:
     GLOBAL_S3_BUCKET: "supabase-on-eks-storage-20250918041141008900000005"  # Real S3 bucket from Terraform
     NODE_TLS_REJECT_UNAUTHORIZED: "0"  # Disable SSL certificate validation for development
     AWS_S3_REGION: "us-east-1"  # Explicit S3 region
-    AWS_S3_FORCE_PATH_STYLE: "false"  # Use virtual-hosted-style URLs for S3
+    AWS_S3_FORCE_PATH_STYLE: "false"
+    # Official docker-compose variables
+    POSTGREST_URL: "http://supabase-supabase-rest:3000"
+    ENABLE_IMAGE_TRANSFORMATION: "true"
+    IMGPROXY_URL: "http://supabase-supabase-imgproxy:5001"  # Use virtual-hosted-style URLs for S3
   serviceAccount:
     create: true
     name: "supabase-storage"
