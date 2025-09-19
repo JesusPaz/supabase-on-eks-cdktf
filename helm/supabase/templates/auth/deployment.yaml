@@ -37,7 +37,10 @@ spec:
               {{- if .Values.db.enabled }}
               value: {{ include "supabase.db.fullname" . | quote }}
               {{- else }}
-              value: {{ .Values.auth.environment.DB_HOST | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.secret.db" . }}
+                  key: host
               {{- end }}
             - name: DB_USER
               valueFrom:
@@ -70,10 +73,25 @@ spec:
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
-            {{- if .Values.db.enabled }}
             - name: DB_HOST
+              {{- if .Values.db.enabled }}
               value: {{ include "supabase.db.fullname" . }}
-            {{- end }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.secret.db" . }}
+                  key: host
+              {{- end }}
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.secret.db.secretRef }}
+                  name: {{ .Values.secret.db.secretRef }}
+                  key: {{ .Values.secret.db.secretRefKey.username | default "username" }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.db" . }}
+                  key: username
+                  {{- end }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:

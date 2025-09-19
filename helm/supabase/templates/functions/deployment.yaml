@@ -43,6 +43,25 @@ spec:
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
+            - name: DB_HOST
+              {{- if .Values.db.enabled }}
+              value: {{ include "supabase.db.fullname" . }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.secret.db" . }}
+                  key: host
+              {{- end }}
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.secret.db.secretRef }}
+                  name: {{ .Values.secret.db.secretRef }}
+                  key: {{ .Values.secret.db.secretRefKey.username | default "username" }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.db" . }}
+                  key: username
+                  {{- end }}
             - name: DB_HOSTNAME
               {{- if .Values.db.enabled }}
               value: {{ include "supabase.db.fullname" . }}
