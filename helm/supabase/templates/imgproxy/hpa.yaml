@@ -1,4 +1,4 @@
-{{- if .Values.imgproxy.autoscaling.enabled }}
+{{- if and .Values.imgproxy.enabled .Values.imgproxy.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

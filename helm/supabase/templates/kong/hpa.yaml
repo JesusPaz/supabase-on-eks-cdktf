@@ -1,4 +1,4 @@
-{{- if .Values.kong.autoscaling.enabled }}
+{{- if and .Values.kong.enabled .Values.kong.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

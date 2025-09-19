@@ -1,4 +1,4 @@
-{{- if .Values.meta.autoscaling.enabled }}
+{{- if and .Values.meta.enabled .Values.meta.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
