@@ -79,7 +79,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "supabase.secret.analytics" . }}
-                  key: key
+                  key: apiKey
             {{- end }}
             # Additional Studio environment variables from docker-compose
             - name: POSTGRES_PASSWORD
