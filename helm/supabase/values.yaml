@@ -5,6 +5,8 @@
 secret:
   jwt:
     enabled: true
+    secretKey: "supabase/jwt"
+    secretStoreRef: "aws-secretsmanager"
   db:
     enabled: true
     autoSecretArn: "rds!db-44a4708a-116b-44d0-b4f9-dedf908c3ca9"
@@ -212,7 +214,7 @@ realtime:
     DB_PORT: "5432"
     DB_DRIVER: "postgres"
     DB_SSL: "disable"
-    DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
+    DB_AFTER_CONNECT_QUERY: "SET search_path TO realtime"
     PORT: "4000"
     FLY_ALLOC_ID: "fly123"
     FLY_APP_NAME: "realtime"

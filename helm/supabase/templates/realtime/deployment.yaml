@@ -45,15 +45,7 @@ spec:
                   key: host
               {{- end }}
             - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.secret.db.secretRef }}
-                  name: {{ .Values.secret.db.secretRef }}
-                  key: {{ .Values.secret.db.secretRefKey.username | default "username" }}
-                  {{- else }}
-                  name: {{ include "supabase.secret.db" . }}
-                  key: username
-                  {{- end }}
+              value: "supabase_admin"
             - name: DB_PORT
               value: {{ include "supabase.db.port" . | quote }}
           command: ["/bin/sh", "-c"]
@@ -93,15 +85,7 @@ spec:
                   key: host
               {{- end }}
             - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.secret.db.secretRef }}
-                  name: {{ .Values.secret.db.secretRef }}
-                  key: {{ .Values.secret.db.secretRefKey.username | default "username" }}
-                  {{- else }}
-                  name: {{ include "supabase.secret.db" . }}
-                  key: username
-                  {{- end }}
+              value: "supabase_admin"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
