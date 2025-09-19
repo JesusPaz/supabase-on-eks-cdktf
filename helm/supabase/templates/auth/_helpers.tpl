@@ -41,3 +41,18 @@ Create the name of the service account to use
 {{- default "default" .Values.auth.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Construct DATABASE_URL for Auth
+*/}}
+{{- define "supabase.auth.databaseUrl" -}}
+{{- $host := "" -}}
+{{- $port := include "supabase.db.port" . -}}
+{{- $sslmode := include "supabase.db.sslmode" . -}}
+{{- if .Values.db.enabled -}}
+{{- $host = include "supabase.db.fullname" . -}}
+{{- else -}}
+{{- $host = "$(GOTRUE_DB_HOST)" -}}
+{{- end -}}
+postgres://$(GOTRUE_DB_USER):$(GOTRUE_DB_PASSWORD)@{{ $host }}:{{ $port }}/$(GOTRUE_DB_NAME)?search_path=auth&sslmode={{ $sslmode }}
+{{- end }}
