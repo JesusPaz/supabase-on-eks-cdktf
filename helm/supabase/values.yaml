@@ -458,7 +458,7 @@ analytics:
       cpu: 500m
       memory: 256Mi
   autoscaling:
-    enabled: true
+    enabled: false
     minReplicas: 1
     maxReplicas: 3
     targetCPUUtilizationPercentage: 80
@@ -494,7 +494,7 @@ vector:
       cpu: 300m
       memory: 256Mi
   autoscaling:
-    enabled: true
+    enabled: false
     minReplicas: 1
     maxReplicas: 2
     targetCPUUtilizationPercentage: 80

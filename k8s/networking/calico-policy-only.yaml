@@ -17,7 +17,7 @@ spec:
         # Calico in policy-only mode - keeps VPC CNI for dataplane
         installation:
           cni:
-            type: None  # Don't install CNI, use existing VPC CNI
+            type: AmazonVPC  # Use AmazonVPC for EKS, keeps VPC CNI for dataplane
           flexVolumePath: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/
         
         # Only install policy enforcement components
