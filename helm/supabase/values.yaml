@@ -42,6 +42,8 @@ db:
     enabled: true
     size: 20Gi
     storageClass: ""
+    accessModes:
+      - ReadWriteOnce
   resources:
     requests:
       cpu: 500m
@@ -296,6 +298,10 @@ storage:
     port: 5000
   persistence:
     enabled: false  # Using S3, not local storage
+    size: 10Gi
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
   resources:
     requests:
       cpu: 200m
@@ -331,6 +337,10 @@ imgproxy:
     port: 5001
   persistence:
     enabled: false  # Imgproxy doesn't need persistent storage
+    size: 5Gi
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
   resources:
     requests:
       cpu: 100m
@@ -507,6 +517,39 @@ functions:
 # Minio - Disabled (using S3 instead)
 minio:
   enabled: false
+  replicaCount: 1
+  image:
+    repository: minio/minio
+    tag: "RELEASE.2023-09-04T19-57-37Z"
+    pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  service:
+    type: ClusterIP
+    port: 9000
+  environment:
+    MINIO_ROOT_USER: "minioadmin"
+    MINIO_ROOT_PASSWORD: "minioadmin123"
+  persistence:
+    enabled: false
+    size: 10Gi
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
 
 # Global settings for all services
 global:

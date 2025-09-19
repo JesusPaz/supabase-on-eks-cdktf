@@ -20,6 +20,8 @@ db:
     enabled: true
     size: 20Gi
     storageClass: ""
+    accessModes:
+      - ReadWriteOnce
   resources:
     requests:
       cpu: 500m
@@ -90,6 +92,8 @@ storage:
   persistence:
     enabled: true
     size: 10Gi
+    accessModes:
+      - ReadWriteOnce
 
 # Analytics
 analytics:
@@ -129,6 +133,8 @@ minio:
   persistence:
     enabled: true
     size: 10Gi
+    accessModes:
+      - ReadWriteOnce
   resources:
     requests:
       cpu: 100m

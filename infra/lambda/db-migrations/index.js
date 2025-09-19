@@ -90,8 +90,9 @@ const runQueries = async (db, dir) => {
         if (err.message.includes('already exists') || 
             err.message.includes('already installed') ||
             err.message.includes('permission denied to set parameter') ||
+            err.message.includes('does not exist') && (err.message.includes('role') || err.message.includes('function')) ||
             err.message.includes('relation') && err.message.includes('already exists')) {
-          console.warn(`Skipping ${file} - resource already exists or permission denied: ${err.message}`);
+          console.warn(`Skipping ${file} - resource already exists, permission denied, or missing dependency: ${err.message}`);
         } else {
           console.error(`Error executing ${file}:`, err.message);
           throw err; // Re-throw to stop execution on error
