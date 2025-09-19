@@ -10,5 +10,13 @@ spec:
   policyTypes:
   - Ingress
   - Egress
-  # No ingress or egress rules = deny all by default
+  egress:
+  # Allow DNS resolution for all pods (critical for basic functionality)
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # No ingress rules = deny all ingress by default
   # Specific NetworkPolicies will override this for allowed traffic
