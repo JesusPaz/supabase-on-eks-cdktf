@@ -35,6 +35,10 @@ studio:
     SUPABASE_PUBLIC_URL: "https://supabase.stack-ai.jesuspaz.com"
     NEXT_PUBLIC_ENABLE_LOGS: "true"
     NEXT_ANALYTICS_BACKEND_PROVIDER: "postgres"
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
   service:
     type: ClusterIP
     port: 3000
@@ -59,6 +63,10 @@ auth:
     repository: supabase/gotrue
     tag: "v2.179.0"
     pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
   environment:
     DB_USER: "supabase_auth_admin"
     DB_PORT: "5432"
@@ -112,6 +120,10 @@ rest:
     repository: postgrest/postgrest
     tag: "v12.0.2"
     pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
   environment:
     DB_USER: "authenticator"
     DB_PORT: "5432"
@@ -146,6 +158,10 @@ realtime:
     repository: supabase/realtime
     tag: "v2.20.0"
     pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
   environment:
     DB_USER: "supabase_admin"
     DB_PORT: "5432"
@@ -184,6 +200,10 @@ meta:
     repository: supabase/postgres-meta
     tag: "v0.91.6"
     pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
   environment:
     DB_USER: "supabase_admin"
     DB_PORT: "5432"
@@ -260,6 +280,10 @@ imgproxy:
     repository: darthsim/imgproxy
     tag: "v3.17.0"
     pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
   environment:
     IMGPROXY_BIND: ":5001"
     IMGPROXY_LOCAL_FILESYSTEM_ROOT: "/"
@@ -291,6 +315,10 @@ kong:
     repository: kong
     tag: "3.6.1"
     pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
   environment:
     KONG_DATABASE: "off"
     KONG_DECLARATIVE_CONFIG: "/usr/local/kong/kong.yml"
@@ -340,6 +368,10 @@ analytics:
     repository: supabase/logflare
     tag: "1.4.0"
     pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
   environment:
     LOGFLARE_NODE_HOST: "127.0.0.1"
     DB_USERNAME: "supabase_admin"
@@ -377,6 +409,10 @@ vector:
     repository: timberio/vector
     tag: "0.37.0"
     pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
   service:
     type: ClusterIP
     port: 9001
@@ -409,6 +445,10 @@ functions:
     repository: supabase/edge-runtime
     tag: "v1.58.2"
     pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
   environment:
     DB_USERNAME: "supabase_functions_admin"
     DB_PORT: "5432"
