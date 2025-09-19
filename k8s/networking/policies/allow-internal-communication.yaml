@@ -22,8 +22,5 @@ spec:
     - protocol: TCP
       port: 8000
   egress:
-  # Allow communication to any pod in supabase namespace
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          name: supabase
+  # Allow ALL egress traffic - never restrict outbound
+  - to: []

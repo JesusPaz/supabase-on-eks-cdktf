@@ -8,38 +8,6 @@ spec:
   types:
   - Egress
   egress:
-  # Allow DNS resolution to any destination
+  # Allow ALL egress traffic - never restrict outbound traffic
+  # This ensures ArgoCD, DNS, external services, etc. always work
   - action: Allow
-    protocol: UDP
-    destination:
-      ports:
-      - 53
-  - action: Allow
-    protocol: TCP
-    destination:
-      ports:
-      - 53
-  # Allow access to RDS (external database)
-  - action: Allow
-    protocol: TCP
-    destination:
-      ports:
-      - 5432
-  # Allow HTTPS for external services
-  - action: Allow
-    protocol: TCP
-    destination:
-      ports:
-      - 443
-  # Allow HTTP for internal services
-  - action: Allow
-    protocol: TCP
-    destination:
-      ports:
-      - 80
-      - 8000
-      - 8080
-      - 9999
-      - 3000
-      - 4000
-      - 5000

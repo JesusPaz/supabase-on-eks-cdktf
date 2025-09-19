@@ -10,13 +10,5 @@ spec:
   policyTypes:
   - Egress
   egress:
-  # Allow access to external RDS database
+  # Allow ALL egress traffic - never restrict outbound
   - to: []
-    ports:
-    - protocol: TCP
-      port: 5432
-  # Allow HTTPS for AWS services (S3, STS, etc.)
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 443
