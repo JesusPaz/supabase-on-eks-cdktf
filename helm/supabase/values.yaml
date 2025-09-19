@@ -13,7 +13,7 @@ secret:
   dashboard:
     enabled: true
   s3:
-    enabled: true
+    enabled: false  # Using IRSA instead of access keys
   smtp:
     enabled: false
 
@@ -288,7 +288,10 @@ storage:
     GLOBAL_S3_FORCE_PATH_STYLE: "false"
     TENANT_ID: "stub"
     REGION: "stub"
-    GLOBAL_S3_BUCKET: "stub"  # Will be overridden by External Secrets
+    GLOBAL_S3_BUCKET: "supabase-on-eks-storage-20250918041141008900000005"  # Real S3 bucket from Terraform
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"  # Disable SSL certificate validation for development
+    AWS_S3_REGION: "us-east-1"  # Explicit S3 region
+    AWS_S3_FORCE_PATH_STYLE: "false"  # Use virtual-hosted-style URLs for S3
   serviceAccount:
     create: true
     name: "supabase-storage"
@@ -453,7 +456,7 @@ vector:
   replicaCount: 1
   image:
     repository: timberio/vector
-    tag: "0.37.0"
+    tag: "latest-alpine"
     pullPolicy: IfNotPresent
   serviceAccount:
     create: true

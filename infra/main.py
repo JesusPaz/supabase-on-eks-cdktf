@@ -1,6 +1,7 @@
 from constructs import Construct
 from cdktf import App, TerraformStack, TerraformOutput, S3Backend
 from cdktf_cdktf_provider_aws.provider import AwsProvider
+from cdktf_cdktf_provider_random.provider import RandomProvider
 
 # Stacks / Constructs
 from stacks.network import Network
@@ -34,6 +35,7 @@ class InfraStack(TerraformStack):
         )
 
         AwsProvider(self, "aws", region=region)
+        RandomProvider(self, "random")
 
         # Common tags
         common = CommonTags(self, "tags", project=project, environment=environment, owner="platform", cost_center="eng"); tags = common.tags

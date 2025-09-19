@@ -159,7 +159,7 @@ spec:
                   key: database
                   {{- end }}
             - name: DATABASE_URL
-              value: $(DB_DRIVER)://$(DB_USER):$(DB_PASSWORD_ENC)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?search_path=auth&sslmode=$(DB_SSL)
+              value: $(DB_DRIVER)://$(DB_USER):$(DB_PASSWORD_ENC)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?search_path=storage,public&sslmode=$(DB_SSL)
             - name: PGRST_JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -178,7 +178,7 @@ spec:
                   key: {{ .Values.secret.jwt.secretRefKey.anonKey | default "anonKey" }}
                   {{- else }}
                   name: {{ include "supabase.secret.jwt" . }}
-                  key: anonKey
+                  key: anon_key
                   {{- end }}
             - name: SERVICE_KEY
               valueFrom:
@@ -188,7 +188,7 @@ spec:
                   key: {{ .Values.secret.jwt.secretRefKey.serviceKey | default "serviceKey" }}
                   {{- else }}
                   name: {{ include "supabase.secret.jwt" . }}
-                  key: serviceKey
+                  key: service_role_key
                   {{- end }}
             {{- if .Values.imgproxy.enabled }}
             - name: IMGPROXY_URL
