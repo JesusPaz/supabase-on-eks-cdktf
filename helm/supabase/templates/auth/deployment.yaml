@@ -71,7 +71,7 @@ spec:
           image: "{{ .Values.auth.image.repository }}:{{ .Values.auth.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.auth.image.pullPolicy }}
           command: ["/bin/sh"]
-          args: ["-c", "export ENCODED_PASSWORD=$(printf '%s' \"$GOTRUE_DB_PASSWORD\" | sed 's/!/\\%21/g; s/@/\\%40/g; s/#/\\%23/g; s/\\$/\\%24/g; s/&/\\%26/g; s/+/\\%2B/g; s/~/\\%7E/g; s/|/\\%7C/g') && export DATABASE_URL=\"postgres://$GOTRUE_DB_USER:$ENCODED_PASSWORD@$GOTRUE_DB_HOST:$GOTRUE_DB_PORT/$GOTRUE_DB_NAME?search_path=auth&sslmode=$GOTRUE_DB_SSL_MODE\" && echo \"DATABASE_URL: $DATABASE_URL\" && gotrue serve"]
+          args: ["-c", "export ENCODED_PASSWORD=$(printf '%s' \"$GOTRUE_DB_PASSWORD\" | sed 's/!/\\%21/g; s/@/\\%40/g; s/#/\\%23/g; s/\\$/\\%24/g; s/&/\\%26/g; s/+/\\%2B/g; s/~/\\%7E/g; s/|/\\%7C/g') && export DATABASE_URL=\"postgres://$GOTRUE_DB_USER:$ENCODED_PASSWORD@$GOTRUE_DB_HOST:$GOTRUE_DB_PORT/$GOTRUE_DB_NAME?search_path=auth&sslmode=$GOTRUE_DB_SSL_MODE\" && echo \"DATABASE_URL: $DATABASE_URL\" && gotrue migrate && gotrue serve"]
           env:
             {{- range $key, $value := .Values.auth.environment }}
             {{- if and (ne $key "DB_SSL") (ne $key "DB_PORT") }}
