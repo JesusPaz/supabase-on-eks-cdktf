@@ -5,7 +5,14 @@
 create publication supabase_realtime;
 
 -- Supabase super admin
--- create user supabase_admin; -- supabase_admin is rds_superuser.
+-- Create supabase_admin user if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'supabase_admin') THEN
+        CREATE USER supabase_admin WITH LOGIN;
+    END IF;
+END
+$$;
 alter user supabase_admin with createdb createrole bypassrls;
 grant rds_replication to supabase_admin; -- for RDS
 

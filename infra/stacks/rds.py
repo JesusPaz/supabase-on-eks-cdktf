@@ -41,25 +41,10 @@ class Rds(Construct):
         )
         
 
-        # Create custom Parameter Group for Supabase requirements
-        self.parameter_group = DbParameterGroup(
-            self,
-            "db_parameter_group",
-            name=f"{db_name}-params",
-            family="postgres14",
-            description="Parameter group for Supabase PostgreSQL",
-            parameter=[
-                {
-                    "name": "shared_preload_libraries",
-                    "value": "pg_stat_statements,pg_tle"
-                },
-                {
-                    "name": "log_statement",
-                    "value": "all"
-                }
-            ],
-            tags={"Project": "supabase-on-eks", "ManagedBy": "cdktf"}
-        )
+        # Use manually created parameter group with pg_tle support
+        # Parameter group created via AWS CLI to ensure correct apply_method
+        # aws rds create-db-parameter-group --db-parameter-group-name supabase-params-with-tle --db-parameter-group-family postgres14
+        # aws rds modify-db-parameter-group --db-parameter-group-name supabase-params-with-tle --parameters "ParameterName=shared_preload_libraries,ParameterValue=pg_stat_statements\\,pg_tle,ApplyMethod=pending-reboot"
 
         self.rds = TerraformModule(
             self,
@@ -71,8 +56,8 @@ class Rds(Construct):
         self.rds.add_override("engine_version", "14")
         self.rds.add_override("family", "postgres14")
         self.rds.add_override("major_engine_version", "14")
-        # Use custom parameter group with pg_tle enabled
-        self.rds.add_override("parameter_group_name", self.parameter_group.name)
+        # Use manually created parameter group with pg_tle enabled
+        self.rds.add_override("parameter_group_name", "supabase-params-with-tle")
         self.rds.add_override("instance_class", "db.t3.medium")
         self.rds.add_override("allocated_storage", 20)
         self.rds.add_override("max_allocated_storage", 100)
