@@ -246,7 +246,7 @@ meta:
   replicaCount: 1
   image:
     repository: supabase/postgres-meta
-    tag: "v0.91.6"
+    tag: "v0.91.0"
     pullPolicy: IfNotPresent
   serviceAccount:
     create: true

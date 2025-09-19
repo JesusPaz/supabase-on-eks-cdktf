@@ -18,5 +18,15 @@ spec:
       port: 53
     - protocol: TCP
       port: 53
+  # Allow RDS access for all pods (external database)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow HTTPS for external services (S3, STS, etc.)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
   # No ingress rules = deny all ingress by default
   # Specific NetworkPolicies will override this for allowed traffic
