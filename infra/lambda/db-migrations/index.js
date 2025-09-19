@@ -91,7 +91,8 @@ const runQueries = async (db, dir) => {
             err.message.includes('already installed') ||
             err.message.includes('permission denied to set parameter') ||
             err.message.includes('does not exist') && (err.message.includes('role') || err.message.includes('function')) ||
-            err.message.includes('relation') && err.message.includes('already exists')) {
+            err.message.includes('relation') && err.message.includes('already exists') ||
+            err.severity === 'NOTICE') {
           console.warn(`Skipping ${file} - resource already exists, permission denied, or missing dependency: ${err.message}`);
         } else {
           console.error(`Error executing ${file}:`, err.message);
@@ -141,17 +142,6 @@ exports.handler = async (event, context) => {
           case 'Create':
           case 'Update': {
             console.info('Running database migrations...');
-            
-            // First, check available extensions
-            try {
-              console.info('Checking available extensions...');
-              const checkQuery = sql.file('./check-extensions.sql');
-              const extensionResults = await db.query(checkQuery);
-              console.info('Available extensions:', JSON.stringify(extensionResults, null, 2));
-            } catch (err) {
-              console.warn('Could not check extensions:', err.message);
-            }
-            
             await runQueries(db, './sql/init-for-rds/');
             await runQueries(db, './sql/init-scripts/');
             await runQueries(db, './sql/migrations/');

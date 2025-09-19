@@ -7,6 +7,7 @@ secret:
     enabled: true
   db:
     enabled: true
+    autoSecretArn: "rds!db-44a4708a-116b-44d0-b4f9-dedf908c3ca9-ue35yh"
   analytics:
     enabled: true
   dashboard:
