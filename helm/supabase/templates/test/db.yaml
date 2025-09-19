@@ -23,7 +23,10 @@ spec:
               {{- if .Values.db.enabled }}
               value: {{ include "supabase.db.fullname" . | quote }}
               {{- else }}
-              value: {{ .Values.auth.environment.DB_HOST | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.secret.db" . }}
+                  key: host
               {{- end }}
             - name: DB_USER
               valueFrom:
@@ -36,7 +39,7 @@ spec:
                   key: username
                   {{- end }}
             - name: DB_PORT
-              value: {{ .Values.auth.environment.DB_PORT | quote }}
+              value: {{ include "supabase.db.port" . | quote }}
           image: postgres:15-alpine
           imagePullPolicy: IfNotPresent
           name: test-db

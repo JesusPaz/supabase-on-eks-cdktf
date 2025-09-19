@@ -73,7 +73,7 @@ spec:
                   key: database
                   {{- end }}
             - name: DB_PORT
-              value: {{ .Values.analytics.environment.DB_PORT | quote }}
+              value: {{ include "supabase.db.port" . | quote }}
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
