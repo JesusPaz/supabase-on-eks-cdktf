@@ -465,7 +465,7 @@ analytics:
 
 # Vector - Log collection and processing
 vector:
-  enabled: true
+  enabled: false  # Disabled since Analytics is disabled (Vector sends logs to Analytics)
   replicaCount: 1
   image:
     repository: timberio/vector
