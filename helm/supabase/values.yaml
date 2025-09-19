@@ -374,6 +374,7 @@ analytics:
     name: ""
   environment:
     LOGFLARE_NODE_HOST: "127.0.0.1"
+    DB_USERNAME: "supabase"
     DB_PORT: "5432"
     DB_DRIVER: "postgresql"
     DB_SSL: "disable"

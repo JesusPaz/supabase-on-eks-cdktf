@@ -43,25 +43,60 @@ spec:
                   key: host
               {{- end }}
             - name: DB_USER
+              value: {{ .Values.analytics.environment.DB_USERNAME | quote }}
+            - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.secret.db.secretRef }}
                   name: {{ .Values.secret.db.secretRef }}
-                  key: {{ .Values.secret.db.secretRefKey.username | default "username" }}
+                  key: {{ .Values.secret.db.secretRefKey.password | default "password" }}
                   {{- else }}
                   name: {{ include "supabase.secret.db" . }}
-                  key: username
+                  key: password
+                  {{- end }}
+            - name: DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.secret.db.secretRef }}
+                  name: {{ .Values.secret.db.secretRef }}
+                  key: {{ .Values.secret.db.secretRefKey.database | default "database" }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.db" . }}
+                  key: database
                   {{- end }}
             - name: DB_PORT
               value: {{ .Values.analytics.environment.DB_PORT | quote }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.secret.db.secretRef }}
+                  name: {{ .Values.secret.db.secretRef }}
+                  key: {{ .Values.secret.db.secretRefKey.password | default "password" }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.db" . }}
+                  key: password
+                  {{- end }}
           command: ["/bin/sh", "-c"]
           args:
             - |
+              echo "Waiting for database to be ready..."
               until pg_isready -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER); do
-              echo "Waiting for database to start..."
-              sleep 2
+                echo "Database not ready, waiting..."
+                sleep 2
               done
-            - echo "Database is ready"
+              echo "Database is ready, checking/creating _analytics schema..."
+              
+              # Check if _analytics schema exists, if not create it
+              SCHEMA_EXISTS=$(psql -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) -d $(DB_DATABASE) -tAc "SELECT 1 FROM information_schema.schemata WHERE schema_name='_analytics';" 2>/dev/null || echo "0")
+              
+              if [ "$SCHEMA_EXISTS" != "1" ]; then
+                echo "Creating _analytics schema..."
+                psql -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) -d $(DB_DATABASE) -c "CREATE SCHEMA IF NOT EXISTS _analytics;" || echo "Schema creation failed, but continuing..."
+              else
+                echo "_analytics schema already exists."
+              fi
+              
+              echo "Database initialization completed."
       containers:
         - name: {{ include "supabase.analytics.name" $ }}
           securityContext:
