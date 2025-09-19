@@ -3,6 +3,7 @@ from constructs import Construct
 from cdktf import TerraformModule
 from cdktf_cdktf_provider_aws.security_group import SecurityGroup
 from cdktf_cdktf_provider_aws.vpc_security_group_ingress_rule import VpcSecurityGroupIngressRule
+from cdktf_cdktf_provider_aws.db_parameter_group import DbParameterGroup
 
 
 class Rds(Construct):
@@ -38,6 +39,27 @@ class Rds(Construct):
             referenced_security_group_id=eks_node_sg_id,
             description="Allow PostgreSQL access from EKS nodes"
         )
+        
+
+        # Create custom Parameter Group for Supabase requirements
+        self.parameter_group = DbParameterGroup(
+            self,
+            "db_parameter_group",
+            name=f"{db_name}-params",
+            family="postgres14",
+            description="Parameter group for Supabase PostgreSQL",
+            parameter=[
+                {
+                    "name": "shared_preload_libraries",
+                    "value": "pg_stat_statements,pg_tle"
+                },
+                {
+                    "name": "log_statement",
+                    "value": "all"
+                }
+            ],
+            tags={"Project": "supabase-on-eks", "ManagedBy": "cdktf"}
+        )
 
         self.rds = TerraformModule(
             self,
@@ -49,6 +71,8 @@ class Rds(Construct):
         self.rds.add_override("engine_version", "14")
         self.rds.add_override("family", "postgres14")
         self.rds.add_override("major_engine_version", "14")
+        # Use custom parameter group with pg_tle enabled
+        self.rds.add_override("parameter_group_name", self.parameter_group.name)
         self.rds.add_override("instance_class", "db.t3.medium")
         self.rds.add_override("allocated_storage", 20)
         self.rds.add_override("max_allocated_storage", 100)
@@ -71,9 +95,11 @@ class Rds(Construct):
         self.rds.add_override("storage_encrypted", True)
         self.rds.add_override("tags", {"Project": "supabase-on-eks", "ManagedBy": "cdktf"})
 
+
+
     @property
     def db_endpoint(self) -> str:
-        return self.rds.get_string("db_instance_endpoint")
+        return self.rds.get_string("db_instance_address")
 
     @property
     def db_name(self) -> str:
@@ -86,3 +112,17 @@ class Rds(Construct):
     @property
     def master_user_secret_arn(self) -> str:
         return self.rds.get_string("db_instance_master_user_secret_arn")
+    
+
+    def allow_lambda_access(self, lambda_security_group_id: str) -> None:
+        """Allow Lambda functions to access the RDS instance"""
+        VpcSecurityGroupIngressRule(
+            self,
+            "rds_ingress_from_lambda",
+            security_group_id=self.rds_sg.id,
+            from_port=5432,
+            to_port=5432,
+            ip_protocol="tcp",
+            referenced_security_group_id=lambda_security_group_id,
+            description="Allow PostgreSQL access from Lambda functions"
+        )

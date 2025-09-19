@@ -1,0 +1,9 @@
+{
+  "name": "db-migrations",
+  "version": "1.0.0",
+  "description": "Lambda function to run database migrations",
+  "main": "index.js",
+  "dependencies": {
+    "@databases/pg": "^5.x"
+  }
+}

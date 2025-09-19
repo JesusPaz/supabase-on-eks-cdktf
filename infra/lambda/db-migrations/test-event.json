@@ -1,0 +1,8 @@
+{
+  "RequestType": "Create",
+  "ResponseURL": "https://httpbin.org/put",
+  "StackId": "arn:aws:cloudformation:us-east-1:123456789012:stack/test-stack/12345678-1234-1234-1234-123456789012",
+  "RequestId": "test-request-id",
+  "LogicalResourceId": "TestResource",
+  "ResourceType": "AWS::CloudFormation::CustomResource"
+}

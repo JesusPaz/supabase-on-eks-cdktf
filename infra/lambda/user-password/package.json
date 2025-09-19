@@ -1,0 +1,9 @@
+{
+  "name": "user-password",
+  "version": "1.0.0",
+  "description": "Lambda function to manage database user passwords",
+  "main": "index.js",
+  "dependencies": {
+    "@databases/pg": "^5.x"
+  }
+}
