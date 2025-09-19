@@ -29,6 +29,9 @@ spec:
     - podSelector:
         matchLabels:
           app.kubernetes.io/name: supabase-storage
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-studio
     ports:
     - protocol: TCP
       port: 9999
