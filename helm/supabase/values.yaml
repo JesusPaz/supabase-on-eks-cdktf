@@ -214,7 +214,7 @@ realtime:
     DB_PORT: "5432"
     DB_DRIVER: "postgres"
     DB_SSL: "disable"
-    DB_AFTER_CONNECT_QUERY: "SET search_path TO realtime"
+    DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
     PORT: "4000"
     FLY_ALLOC_ID: "fly123"
     FLY_APP_NAME: "realtime"
@@ -424,7 +424,7 @@ kong:
 
 # Analytics - Logflare for logs and metrics
 analytics:
-  enabled: false  # Temporarily disabled due to CDC permissions complexity
+  enabled: true  # Temporarily disabled due to CDC permissions complexity
   replicaCount: 1
   image:
     repository: supabase/logflare
@@ -467,7 +467,7 @@ analytics:
 
 # Vector - Log collection and processing
 vector:
-  enabled: false  # Disabled since Analytics is disabled (Vector sends logs to Analytics)
+  enabled: true  # Disabled since Analytics is disabled (Vector sends logs to Analytics)
   replicaCount: 1
   image:
     repository: timberio/vector
