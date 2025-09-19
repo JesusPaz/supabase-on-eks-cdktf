@@ -84,6 +84,10 @@ studio:
     SUPABASE_PUBLIC_URL: "https://supabase.stack-ai.jesuspaz.com"
     NEXT_PUBLIC_ENABLE_LOGS: "true"
     NEXT_ANALYTICS_BACKEND_PROVIDER: "postgres"
+    # Self-hosted configuration
+    NEXT_PUBLIC_IS_PLATFORM: "false"
+    NEXT_PUBLIC_ENVIRONMENT: "local"
+    NEXT_PUBLIC_API_URL: "https://supabase.stack-ai.jesuspaz.com"
   serviceAccount:
     create: true
     annotations: {}
