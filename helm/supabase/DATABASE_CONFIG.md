@@ -104,6 +104,24 @@ El chart genera automáticamente las siguientes variables para todos los servici
 
 ## Troubleshooting
 
+### Error de PersistentVolumeClaim accessModes
+
+Si encuentras el error:
+```
+PersistentVolumeClaim "supabase-supabase-db-pvc" is invalid: spec.accessModes: Required value: at least 1 access mode is required
+```
+
+Esto significa que los `accessModes` no están configurados. Asegúrate de que tu configuración incluya:
+
+```yaml
+db:
+  persistence:
+    enabled: true
+    size: 20Gi
+    accessModes:
+      - ReadWriteOnce  # Requerido para PVC
+```
+
 ### Verificar Conectividad
 
 ```bash
@@ -129,4 +147,15 @@ kubectl describe externalsecret supabase-db
 
 # Para secrets locales
 kubectl get secret supabase-db -o yaml
+```
+
+### Verificar PersistentVolumeClaims
+
+```bash
+# Ver estado de los PVCs
+kubectl get pvc
+kubectl describe pvc supabase-supabase-db-pvc
+
+# Ver si hay StorageClass disponible
+kubectl get storageclass
 ```

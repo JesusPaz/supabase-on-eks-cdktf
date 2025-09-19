@@ -16,6 +16,7 @@ class IrsaRole(Construct):
         policy_arns: List[str] | None = None,
         attach_load_balancer_controller_policy: bool = False,
         attach_ebs_csi_policy: bool = False,
+        attach_cluster_autoscaler_policy: bool = False,
     ) -> None:
         super().__init__(scope, id)
 
@@ -39,6 +40,8 @@ class IrsaRole(Construct):
             self.module.add_override("attach_load_balancer_controller_policy", True)
         if attach_ebs_csi_policy:
             self.module.add_override("attach_ebs_csi_policy", True)
+        if attach_cluster_autoscaler_policy:
+            self.module.add_override("attach_cluster_autoscaler_policy", True)
 
     @property
     def role_arn(self) -> str:

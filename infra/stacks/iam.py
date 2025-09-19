@@ -107,3 +107,15 @@ class IamRoles(Construct):
             service_account_name="ebs-csi-controller-sa",
             attach_ebs_csi_policy=True,
         )
+
+        # Cluster Autoscaler IRSA role for auto-scaling node groups
+        self.cluster_autoscaler = IrsaRole(
+            self,
+            "cluster_autoscaler",
+            role_name=f"{cluster_name}-cluster-autoscaler",
+            oidc_provider_arn=oidc_provider_arn,
+            oidc_provider_url=oidc_provider_url,
+            namespace="kube-system",
+            service_account_name="cluster-autoscaler",
+            attach_cluster_autoscaler_policy=True,
+        )

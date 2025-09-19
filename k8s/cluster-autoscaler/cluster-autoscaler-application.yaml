@@ -1,0 +1,143 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-autoscaler
+  namespace: argocd
+spec:
+  destination:
+    namespace: kube-system
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: cluster-autoscaler
+    repoURL: https://kubernetes.github.io/autoscaler
+    targetRevision: 9.37.0
+    helm:
+      values: |
+        # AWS Cluster Autoscaler Configuration
+        awsRegion: us-east-1
+        
+        # EKS Cluster Configuration
+        autoDiscovery:
+          clusterName: supabase-on-eks
+          enabled: true
+        
+        # IRSA Configuration
+        rbac:
+          serviceAccount:
+            create: true
+            name: cluster-autoscaler
+            annotations:
+              eks.amazonaws.com/role-arn: arn:aws:iam::851725652296:role/supabase-on-eks-cluster-autoscaler-20250919045145920500000002
+        
+        # Deployment Configuration
+        replicaCount: 1
+        
+        image:
+          repository: registry.k8s.io/autoscaling/cluster-autoscaler
+          tag: v1.28.2
+          pullPolicy: IfNotPresent
+        
+        # Resource Configuration
+        resources:
+          limits:
+            cpu: 100m
+            memory: 300Mi
+          requests:
+            cpu: 100m
+            memory: 300Mi
+        
+        # Node Selection
+        nodeSelector:
+          kubernetes.io/os: linux
+        
+        # Tolerations for system nodes
+        tolerations: []
+        
+        # Pod Security Context
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 65534
+          fsGroup: 65534
+        
+        # Container Security Context
+        containerSecurityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+        
+        # Cluster Autoscaler Configuration
+        extraArgs:
+          v: 4
+          stderrthreshold: info
+          cloud-provider: aws
+          skip-nodes-with-local-storage: false
+          expander: least-waste
+          node-group-auto-discovery: asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/supabase-on-eks
+          balance-similar-node-groups: false
+          scale-down-enabled: true
+          scale-down-delay-after-add: 10m
+          scale-down-unneeded-time: 10m
+          scale-down-utilization-threshold: 0.5
+          max-node-provision-time: 15m
+        
+        # Service Monitor for Prometheus (optional)
+        serviceMonitor:
+          enabled: false
+          
+        # Pod Disruption Budget
+        podDisruptionBudget:
+          enabled: true
+          maxUnavailable: 1
+        
+        # Priority Class
+        priorityClassName: system-cluster-critical
+        
+        # Deployment Strategy
+        updateStrategy:
+          type: RollingUpdate
+          rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 0
+        
+        # Pod Labels
+        podLabels:
+          app: cluster-autoscaler
+          component: cluster-autoscaler
+        
+        # Pod Annotations
+        podAnnotations:
+          cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+        
+        # Enable expanded node group configuration
+        expanderPriorities: {}
+        
+        # CloudWatch metrics (optional)
+        cloudWatch:
+          enabled: false
+          region: us-east-1
+          
+        # Additional environment variables
+        extraEnvVars: []
+        
+        # Additional volume mounts
+        extraVolumeMounts: []
+        
+        # Additional volumes
+        extraVolumes: []
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

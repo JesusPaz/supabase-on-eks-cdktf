@@ -136,6 +136,7 @@ class InfraStack(TerraformStack):
         TerraformOutput(self, "external_secrets_role_arn", value=iam_roles.external_secrets.role_arn)
         TerraformOutput(self, "ebs_csi_driver_role_arn", value=iam_roles.ebs_csi_driver.role_arn)
         TerraformOutput(self, "app_s3_role_arn", value=iam_roles.app_role.role_arn)
+        TerraformOutput(self, "cluster_autoscaler_role_arn", value=iam_roles.cluster_autoscaler.role_arn)
         TerraformOutput(self, "migration_lambda_arn", value=db_migrations.migration_lambda_arn)
         TerraformOutput(self, "user_password_lambda_arn", value=db_migrations.user_password_lambda_arn)
 

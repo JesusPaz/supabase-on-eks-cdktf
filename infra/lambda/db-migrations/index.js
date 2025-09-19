@@ -141,6 +141,17 @@ exports.handler = async (event, context) => {
           case 'Create':
           case 'Update': {
             console.info('Running database migrations...');
+            
+            // First, check available extensions
+            try {
+              console.info('Checking available extensions...');
+              const checkQuery = sql.file('./check-extensions.sql');
+              const extensionResults = await db.query(checkQuery);
+              console.info('Available extensions:', JSON.stringify(extensionResults, null, 2));
+            } catch (err) {
+              console.warn('Could not check extensions:', err.message);
+            }
+            
             await runQueries(db, './sql/init-for-rds/');
             await runQueries(db, './sql/init-scripts/');
             await runQueries(db, './sql/migrations/');
