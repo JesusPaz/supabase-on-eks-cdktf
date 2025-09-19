@@ -144,6 +144,7 @@ spec:
                   name: {{ include "supabase.secret.jwt" . }}
                   key: secret
                   {{- end }}
+            {{- if .Values.secret.smtp.enabled }}
             - name: GOTRUE_SMTP_USER
               valueFrom:
                 secretKeyRef:
@@ -164,6 +165,7 @@ spec:
                   name: {{ include "supabase.secret.smtp" . }}
                   key: password
                   {{- end }}
+            {{- end }}
           {{- with .Values.auth.envFrom }}
           envFrom:
             {{- toYaml . | nindent 12 }}
