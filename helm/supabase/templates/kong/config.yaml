@@ -250,6 +250,20 @@ data:
             strip_path: true
             paths:
               - /
+      # Platform API compatibility routes for Studio self-hosted
+      - name: platform-pg-meta
+        _comment: "Platform API: /api/platform/pg-meta/* -> http://{{ include "supabase.meta.fullname" . }}:{{ .Values.meta.service.port }}/*"
+        url: http://{{ include "supabase.meta.fullname" . }}:{{ .Values.meta.service.port }}/
+        routes:
+          - name: platform-pg-meta-all
+            strip_path: true
+            paths:
+              - /api/platform/pg-meta/
+        plugins:
+          - name: cors
+          - name: basic-auth
+            config:
+              hide_credentials: true
     {{- if .Values.secret.dashboard }}
         plugins:
           - name: cors
