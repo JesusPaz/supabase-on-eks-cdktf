@@ -116,6 +116,7 @@ class InfraStack(TerraformStack):
             cluster_name=eks.cluster_name,
             bucket_arn=bucket.bucket_arn,
             bucket_name=bucket.bucket_name,
+            kms_key_arn=kms.s3_key_arn,
         )
 
         # App-level secrets placeholders (JWT, anon, service role)

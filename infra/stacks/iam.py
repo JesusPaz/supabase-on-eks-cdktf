@@ -13,6 +13,7 @@ class IamRoles(Construct):
         cluster_name: str,
         bucket_arn: str,
         bucket_name: str,
+        kms_key_arn: str,
     ) -> None:
         super().__init__(scope, id)
 
@@ -81,8 +82,13 @@ class IamRoles(Construct):
             '  "Statement": [\n'
             '    {\n'
             '      "Effect": "Allow",\n'
-            f'      "Action": ["s3:PutObject","s3:GetObject","s3:DeleteObject","s3:ListBucket"],\n'
+            f'      "Action": ["s3:PutObject","s3:GetObject","s3:DeleteObject","s3:ListBucket","s3:PutObjectTagging","s3:GetObjectTagging","s3:DeleteObjectTagging","s3:GetObjectVersion","s3:DeleteObjectVersion"],\n'
             f'      "Resource": ["{bucket_arn}", "{bucket_arn}/*"]\n'
+            '    },\n'
+            '    {\n'
+            '      "Effect": "Allow",\n'
+            '      "Action": ["kms:GenerateDataKey","kms:Decrypt"],\n'
+            f'      "Resource": "{kms_key_arn}"\n'
             '    }\n'
             '  ]\n'
             '}',
@@ -95,7 +101,7 @@ class IamRoles(Construct):
             oidc_provider_arn=oidc_provider_arn,
             oidc_provider_url=oidc_provider_url,
             namespace="supabase",
-            service_account_name="supabase-app",
+            service_account_name="supabase-storage",
             policy_arns=[s3_policy.get_string("arn")],
         )
 

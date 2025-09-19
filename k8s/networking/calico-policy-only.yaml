@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: calico-policy-only
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: calico
+    app.kubernetes.io/instance: calico-policy-only
+spec:
+  project: default
+  source:
+    repoURL: https://docs.tigera.io/calico/charts
+    chart: tigera-operator
+    targetRevision: v3.27.0
+    helm:
+      values: |
+        # Calico in policy-only mode - keeps VPC CNI for dataplane
+        installation:
+          cni:
+            type: None  # Don't install CNI, use existing VPC CNI
+          flexVolumePath: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/
+        
+        # Only install policy enforcement components
+        calicoNetwork:
+          bgp: Disabled
+          ipPools: []
+          
+        # Minimal resource requirements
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+            
+        # Node selector for control plane if needed
+        nodeSelector: {}
+        
+        # Tolerations for system nodes
+        tolerations:
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+          
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tigera-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+  revisionHistoryLimit: 3

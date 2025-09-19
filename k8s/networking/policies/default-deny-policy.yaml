@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: supabase
+  labels:
+    app.kubernetes.io/name: default-deny
+spec:
+  podSelector: {}  # Apply to all pods in supabase namespace
+  policyTypes:
+  - Ingress
+  - Egress
+  # No ingress or egress rules = deny all by default
+  # Specific NetworkPolicies will override this for allowed traffic

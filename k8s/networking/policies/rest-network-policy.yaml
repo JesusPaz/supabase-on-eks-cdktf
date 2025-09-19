@@ -1,0 +1,52 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: rest-network-policy
+  namespace: supabase
+  labels:
+    app.kubernetes.io/name: supabase-rest
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: supabase-rest
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from Kong
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-kong
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow traffic from Storage (for metadata operations)
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-storage
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow traffic from Studio
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-studio
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  # Allow connection to RDS database
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53

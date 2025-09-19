@@ -1,0 +1,65 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: studio-network-policy
+  namespace: supabase
+  labels:
+    app.kubernetes.io/name: supabase-studio
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: supabase-studio
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from Kong (for dashboard access)
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-kong
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  # Allow connection to all Supabase services
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/component: supabase
+  # Allow connection to Kong
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-kong
+    ports:
+    - protocol: TCP
+      port: 8000
+  # Allow connection to Meta service
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-meta
+    ports:
+    - protocol: TCP
+      port: 8080
+  # Allow connection to Analytics
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-analytics
+    ports:
+    - protocol: TCP
+      port: 4000
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow HTTPS for external services
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443

@@ -1,0 +1,65 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: storage-network-policy
+  namespace: supabase
+  labels:
+    app.kubernetes.io/name: supabase-storage
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: supabase-storage
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from Kong
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-kong
+    ports:
+    - protocol: TCP
+      port: 5000
+  # Allow traffic from Studio for file management
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-studio
+    ports:
+    - protocol: TCP
+      port: 5000
+  egress:
+  # Allow connection to RDS database
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow connection to PostgREST
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-rest
+    ports:
+    - protocol: TCP
+      port: 3000
+  # Allow connection to Imgproxy
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: supabase-imgproxy
+    ports:
+    - protocol: TCP
+      port: 5001
+  # Allow HTTPS for AWS S3/STS
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
