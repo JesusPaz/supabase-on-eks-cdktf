@@ -112,7 +112,7 @@ spec:
           image: "{{ .Values.analytics.image.repository }}:{{ .Values.analytics.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.analytics.image.pullPolicy }}
           command: ["/bin/sh"]
-          args: ["-c", "export POSTGRES_BACKEND_URL=\"postgresql://supabase_admin:$DB_PASSWORD@$DB_HOSTNAME:$DB_PORT/_supabase\" && exec /app/bin/logflare start"]
+          args: ["-c", "export POSTGRES_BACKEND_URL=\"postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOSTNAME:$DB_PORT/$DB_DATABASE\" && exec /app/bin/logflare start"]
           env:
             {{- range $key, $value := .Values.analytics.environment }}
             {{- if and (ne $key "DB_SSL") (ne $key "DB_PORT") }}
@@ -134,7 +134,15 @@ spec:
                   key: host
               {{- end }}
             - name: DB_USERNAME
-              value: "supabase_admin"
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.secret.db.secretRef }}
+                  name: {{ .Values.secret.db.secretRef }}
+                  key: {{ .Values.secret.db.secretRefKey.username | default "username" }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.db" . }}
+                  key: username
+                  {{- end }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -156,7 +164,15 @@ spec:
                   key: password_encoded
                   {{- end }}
             - name: DB_DATABASE
-              value: "_supabase"
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.secret.db.secretRef }}
+                  name: {{ .Values.secret.db.secretRef }}
+                  key: {{ .Values.secret.db.secretRefKey.database | default "database" }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.db" . }}
+                  key: database
+                  {{- end }}
             - name: LOGFLARE_API_KEY
               valueFrom:
                 secretKeyRef:
