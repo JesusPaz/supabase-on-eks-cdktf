@@ -31,7 +31,7 @@ spec:
   - to:
     - podSelector:
         matchLabels:
-          app.kubernetes.io/component: supabase
+          app.kubernetes.io/instance: supabase
   # Allow DNS resolution
   - to: []
     ports:
