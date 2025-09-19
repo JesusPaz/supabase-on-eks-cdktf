@@ -1,1152 +1,463 @@
-# File structure of values.yaml:
-# |-- 1.  Database
-# |-- 2.  Studio
-# |-- 3.  Auth
-# |-- 4.  Rest
-# |-- 5.  Realtime
-# |-- 6.  Meta
-# |-- 7.  Storage
-# |-- 8.  Image Proxy
-# |-- 9.  Kong
-# |-- 10. Analytics
-# |-- 11. Vector
-# |-- 12. Functions
-# |-- 13. Minio
+# Supabase Helm Chart - AWS EKS Configuration
+# Optimized for AWS EKS with External RDS, S3, and External Secrets
 
+# Security configuration - External Secrets from AWS Secrets Manager
 secret:
-  # jwt will be used to reference secret in multiple services:
-  # Anon & Service key: Studio, Storage, Kong
-  # JWT Secret: Analytics, Auth, Rest, Realtime, Storage
   jwt:
-    anonKey: ""
-    serviceKey: ""
-    secret: ""
-    # specify existing secret, which takes precedence over variables above
-    secretRef: ""
-    # override secret keys for existing secret refs
-    secretRefKey:
-      anonKey: anonKey
-      serviceKey: serviceKey
-      secret: secret
-  # database credentials
-  # these fields must be provided even if using external database
+    enabled: true
   db:
-    username: ""
-    password: ""
-    database: ""
-    # specify existing secret, which takes precedence over variables above
-    secretRef: ""
-    # override secret keys for existing secret refs
-    secretRefKey:
-      username: username
-      password: password
-      database: database
-  # analytics Logflare API key
+    enabled: true
   analytics:
-    apiKey: ""
-    # specify existing secret, which takes precedence over variable above
-    secretRef: ""
-    # override secret keys for existing secret refs
-    secretRefKey:
-      apiKey: apiKey
-  # smtp will be used to reference secret including smtp credentials
-  smtp:
-    # username: ""
-    # password: ""
-    # specify existing secret, which takes precedence over variables above
-    # secretRef: ""
-    # override secret keys for existing secret refs
-    secretRefKey:
-      username: username
-      password: password
-  # secret used to access the studio dashboard
-  # leave it empty to disable dashboard authentication
+    enabled: true
   dashboard:
-    # username: ""
-    # password: ""
-    # specify existing secret, which takes precedence over variables above
-    # secretRef: ""
-    # override secret keys for existing secret refs
-    secretRefKey:
-      username: username
-      password: password
-  # S3 credentials for storage object bucket
+    enabled: true
   s3:
-    # keyId: ""
-    # accessKey: ""
-    # specify existing secret, which takes precedence over variables above
-    # secretRef: ""
-    # override secret keys for existing secret refs
-    secretRefKey:
-      keyId: keyId
-      accessKey: accessKey
+    enabled: true
+  smtp:
+    enabled: false
 
-# Optional: Postgres Database
-# A standalone Postgres database configured to work with Supabase services.
-# You can spin up any other Postgres database container if required.
-# If so, make sure to adjust DB_HOST accordingly to point to the right database service.
+# Database configuration (External RDS PostgreSQL)
 db:
-  # Enable database provisioning
-  enabled: true
-  image:
-    repository: supabase/postgres
-    pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  replicaCount: 1
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
-  service:
-    type: ClusterIP
-    port: 5432
-  environment:
-    POSTGRES_HOST: /var/run/postgresql
-    PGPORT: "5432"
-    POSTGRES_PORT: "5432"
-    JWT_EXP: 3600
-    # POSTGRES_HOST_AUTH_METHOD: md5
-    # Enable SSL for postgres by specifying paths for mounted certificate key pair
-    # POSTGRES_SSL_CERT: /path/to/ssl/server.crt
-    # POSTGRES_SSL_KEY: /path/to/ssl/server.key
-  # volumeMounts:
-  #   - name: volume_name
-  #     mountPath: /path/to/my/secret
-  # volumes:
-  #   - name: volume_name
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.txt
-  #         path: name_of_file_in_container.txt
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-  persistence:
-    enabled: true
-    storageClassName: ""
-    annotations: {}
-    size: 8Gi
-    accessModes:
-      - ReadWriteOnce
-    class: ""
-  autoscaling:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-  # Additional migration scripts can be defined here
-  config: {}
+  enabled: false  # Using external RDS PostgreSQL
 
-# Studio Application
+# Studio Application - Supabase Dashboard
 studio:
-  # Enable studio provisioning
   enabled: true
+  replicaCount: 1
   image:
     repository: supabase/studio
+    tag: "2025.09.15-sha-6cff20b"
     pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  replicaCount: 1
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  environment:
+    STUDIO_DEFAULT_ORGANIZATION: "Default Organization"
+    STUDIO_DEFAULT_PROJECT: "Default Project" 
+    STUDIO_PORT: "3000"
+    SUPABASE_PUBLIC_URL: "https://supabase.stack-ai.jesuspaz.com"
+    NEXT_PUBLIC_ENABLE_LOGS: "true"
+    NEXT_ANALYTICS_BACKEND_PROVIDER: "postgres"
   service:
     type: ClusterIP
     port: 3000
-  environment:
-    STUDIO_DEFAULT_ORGANIZATION: Default Organization
-    STUDIO_DEFAULT_PROJECT: Default Project
-    STUDIO_PORT: "3000"
-    SUPABASE_PUBLIC_URL: http://example.com
-    NEXT_PUBLIC_ENABLE_LOGS: "true"
-    # Set value to bigquery to use Big Query backend for analytics
-    NEXT_ANALYTICS_BACKEND_PROVIDER: postgres  # postgres, bigquery
-  # volumeMounts:
-  #   - name: volume_name
-  #     mountPath: /path/to/my/secret
-  # volumes:
-  #   - name: volume_name
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.txt
-  #         path: name_of_file_in_container.txt
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 100
+    maxReplicas: 3
     targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
 
-# Auth Service
+# Auth Service - GoTrue Authentication
 auth:
-  # Enable auth provisioning
   enabled: true
+  replicaCount: 1
   image:
     repository: supabase/gotrue
+    tag: "v2.179.0"
     pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  replicaCount: 1
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
-  service:
-    type: ClusterIP
-    port: 9999
   environment:
-    # Override the database hostname if using external database
-    # DB_HOST: DATABASE.NAMESPACE.svc.cluster.local
-    DB_USER: supabase_auth_admin
-    DB_PORT: 5432
-    DB_DRIVER: postgres
-    DB_SSL: disable  # disable, allow, prefer, require, verify-ca, verify-full
-    API_EXTERNAL_URL: http://example.com
+    DB_USER: "supabase_auth_admin"
+    DB_PORT: "5432"
+    DB_DRIVER: "postgres"
+    DB_SSL: "disable"
+    DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
+    API_EXTERNAL_URL: "https://supabase.stack-ai.jesuspaz.com"
     GOTRUE_API_HOST: "0.0.0.0"
     GOTRUE_API_PORT: "9999"
-    GOTRUE_SITE_URL: http://example.com
+    GOTRUE_SITE_URL: "https://supabase.stack-ai.jesuspaz.com"
     GOTRUE_URI_ALLOW_LIST: "*"
     GOTRUE_DISABLE_SIGNUP: "false"
-    GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
-    GOTRUE_JWT_ADMIN_ROLES: service_role
-    GOTRUE_JWT_AUD: authenticated
+    GOTRUE_JWT_DEFAULT_GROUP_NAME: "authenticated"
+    GOTRUE_JWT_ADMIN_ROLES: "service_role"
+    GOTRUE_JWT_AUD: "authenticated"
     GOTRUE_JWT_EXP: "3600"
     GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
     GOTRUE_MAILER_AUTOCONFIRM: "true"
-    # GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: true
-    # GOTRUE_SMTP_MAX_FREQUENCY: 1s
-    GOTRUE_SMTP_ADMIN_EMAIL: "SMTP_ADMIN_MAIL"
-    GOTRUE_SMTP_HOST: "SMTP_HOST"
-    GOTRUE_SMTP_PORT: "SMTP_PORT"
-    GOTRUE_SMTP_SENDER_NAME: "SMTP_SENDER_NAME"
     GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
     GOTRUE_SMS_AUTOCONFIRM: "false"
     GOTRUE_MAILER_URLPATHS_INVITE: "/auth/v1/verify"
     GOTRUE_MAILER_URLPATHS_CONFIRMATION: "/auth/v1/verify"
     GOTRUE_MAILER_URLPATHS_RECOVERY: "/auth/v1/verify"
     GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: "/auth/v1/verify"
-  envFrom: []
-    # - secretRef:
-    #     name: env-secret
-  # volumeMounts:
-  #   - name: volume_name
-  #     mountPath: /path/to/my/secret
-  # volumes:
-  #   - name: volume_name
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.txt
-  #         path: name_of_file_in_container.txt
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+    # SMTP Configuration (optional)
+    GOTRUE_SMTP_ADMIN_EMAIL: "admin@example.com"
+    GOTRUE_SMTP_HOST: "smtp.example.com"
+    GOTRUE_SMTP_PORT: "587"
+    GOTRUE_SMTP_SENDER_NAME: "Supabase"
+  service:
+    type: ClusterIP
+    port: 9999
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
 
-# Rest Service
+# REST API - PostgREST
 rest:
-  # Enable postgrest provisioning
   enabled: true
+  replicaCount: 1
   image:
     repository: postgrest/postgrest
+    tag: "v12.0.2"
     pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  environment:
+    DB_USER: "authenticator"
+    DB_PORT: "5432"
+    DB_DRIVER: "postgres"
+    DB_SSL: "disable"
+    DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
+    PGRST_DB_SCHEMAS: "public,storage,graphql_public"
+    PGRST_DB_ANON_ROLE: "anon"
+    PGRST_DB_USE_LEGACY_GUCS: "false"
+    PGRST_APP_SETTINGS_JWT_EXP: "3600"
   service:
     type: ClusterIP
     port: 3000
-  environment:
-    # Override the database hostname if using external database
-    # DB_HOST: DATABASE.NAMESPACE.svc.cluster.local
-    DB_USER: authenticator
-    DB_PORT: 5432
-    DB_DRIVER: postgres
-    DB_SSL: disable  # disable, allow, prefer, require, verify-ca, verify-full
-    PGRST_DB_SCHEMAS: public,storage,graphql_public
-    PGRST_DB_ANON_ROLE: anon
-    PGRST_DB_USE_LEGACY_GUCS: false
-    PGRST_APP_SETTINGS_JWT_EXP: 3600
-  # volumeMounts:
-  #   - name: volume_name
-  #     mountPath: /path/to/my/secret
-  # volumes:
-  #   - name: volume_name
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.txt
-  #         path: name_of_file_in_container.txt
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
 
-# Realtime Service
+# Realtime Service - WebSocket subscriptions
 realtime:
-  # Enable realtime provisioning
   enabled: true
+  replicaCount: 1
   image:
     repository: supabase/realtime
+    tag: "v2.20.0"
     pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  environment:
+    DB_USER: "supabase_admin"
+    DB_PORT: "5432"
+    DB_DRIVER: "postgres"
+    DB_SSL: "disable"
+    DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
+    DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
+    PORT: "4000"
+    FLY_ALLOC_ID: "fly123"
+    FLY_APP_NAME: "realtime"
+    SECRET_KEY_BASE: "UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq"
+    ERL_AFLAGS: "-proto_dist inet_tcp"
+    ENABLE_TAILSCALE: "false"
+    DNS_NODES: "''"
   service:
     type: ClusterIP
     port: 4000
-  environment:
-    # Override the database hostname if using external database
-    # DB_HOST: DATABASE.NAMESPACE.svc.cluster.local
-    DB_USER: supabase_admin
-    DB_PORT: 5432
-    DB_SSL: disable  # disable, allow, prefer, require, verify-ca, verify-full
-    DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
-    DB_ENC_KEY: supabaserealtime
-    PORT: "4000"
-    FLY_ALLOC_ID: fly123
-    FLY_APP_NAME: realtime
-    SECRET_KEY_BASE: UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
-    ERL_AFLAGS: -proto_dist inet_tcp
-    ENABLE_TAILSCALE: "false"
-    DNS_NODES: "''"
-  # volumeMounts:
-  #   - name: volume_name
-  #     mountPath: /path/to/my/secret
-  # volumes:
-  #   - name: volume_name
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.txt
-  #         path: name_of_file_in_container.txt
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
 
-# Meta Service
+# Meta Service - PostgreSQL metadata API
 meta:
-  # Enable meta provisioning
   enabled: true
+  replicaCount: 1
   image:
     repository: supabase/postgres-meta
+    tag: "v0.91.6"
     pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  replicaCount: 1
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  environment:
+    DB_USER: "supabase_admin"
+    DB_PORT: "5432"
+    DB_DRIVER: "postgres"
+    DB_SSL: "disable"
+    PG_META_PORT: "8080"
   service:
     type: ClusterIP
     port: 8080
-  environment:
-    # Override the database hostname if using external database
-    # DB_HOST: DATABASE.NAMESPACE.svc.cluster.local
-    DB_USER: supabase_admin
-    DB_PORT: 5432
-    DB_DRIVER: postgres
-    DB_SSL: disable  # disable, allow, prefer, require, verify-ca, verify-full
-    PG_META_PORT: "8080"
-  # volumeMounts:
-  #   - name: volume_name
-  #     mountPath: /path/to/my/secret
-  # volumes:
-  #   - name: volume_name
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.txt
-  #         path: name_of_file_in_container.txt
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 100
+    maxReplicas: 3
     targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
 
-# Storage Service
+# Storage Service - File storage with S3 backend
 storage:
-  # Enable storage provisioning
   enabled: true
+  replicaCount: 1
   image:
     repository: supabase/storage-api
+    tag: "v0.43.0"
     pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  replicaCount: 1
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
+  environment:
+    DB_USER: "supabase_storage_admin"
+    DB_PORT: "5432"
+    DB_DRIVER: "postgres"
+    DB_SSL: "disable"
+    DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
+    PGOPTIONS: "-c search_path=storage,public"
+    FILE_SIZE_LIMIT: "52428800"
+    STORAGE_BACKEND: "s3"  # Using S3 instead of local file storage
+    AWS_DEFAULT_REGION: "us-east-1"
+    GLOBAL_S3_PROTOCOL: "https"
+    GLOBAL_S3_FORCE_PATH_STYLE: "false"
+    TENANT_ID: "stub"
+    REGION: "stub"
+    GLOBAL_S3_BUCKET: "stub"  # Will be overridden by External Secrets
   serviceAccount:
-    # Specifies whether a service account should be created
     create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+    name: "supabase-storage"
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::851725652296:role/supabase-on-eks-app-s3-20250918044322522300000007"
   service:
     type: ClusterIP
     port: 5000
-  environment:
-    # Override the database hostname if using external database
-    # DB_HOST: DATABASE.NAMESPACE.svc.cluster.local
-    DB_USER: supabase_storage_admin
-    DB_PORT: 5432
-    DB_DRIVER: postgres
-    DB_SSL: disable  # disable, allow, prefer, require, verify-ca, verify-full
-    PGOPTIONS: -c search_path=storage,public
-    FILE_SIZE_LIMIT: "52428800"
-    STORAGE_BACKEND: file  # file, s3
-    FILE_STORAGE_BACKEND_PATH: /var/lib/storage
-    TENANT_ID: stub
-    REGION: stub
-    GLOBAL_S3_BUCKET: stub
-    # Set variables below and secret.s3 above to enable S3 storage bucket
-    # If using this chart's minio, skip the endpoint and protocol below
-    # GLOBAL_S3_ENDPOINT: http://minio:9000
-    # GLOBAL_S3_PROTOCOL: http
-    # GLOBAL_S3_FORCE_PATH_STYLE: true
-    # AWS_DEFAULT_REGION: stub
-  # volumeMounts:
-  #   - name: volume_name
-  #     mountPath: /path/to/my/secret
-  # volumes:
-  #   - name: volume_name
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.txt
-  #         path: name_of_file_in_container.txt
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
   persistence:
-    enabled: true
-    storageClassName: ""
-    annotations: {}
-    size: 10Gi
-    accessModes:
-      - ReadWriteOnce
-    class: ""
+    enabled: false  # Using S3, not local storage
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 70
 
-# imgproxy
+# Image Proxy - Image processing and optimization
 imgproxy:
-  # Enable imgproxy provisioning
   enabled: true
+  replicaCount: 1
   image:
     repository: darthsim/imgproxy
+    tag: "v3.17.0"
     pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  replicaCount: 1
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  environment:
+    IMGPROXY_BIND: ":5001"
+    IMGPROXY_LOCAL_FILESYSTEM_ROOT: "/"
+    IMGPROXY_USE_ETAG: "true"
+    IMGPROXY_ENABLE_WEBP_DETECTION: "true"
   service:
     type: ClusterIP
     port: 5001
-  environment:
-    IMGPROXY_BIND: ":5001"
-    IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
-    IMGPROXY_USE_ETAG: "true"
-    IMGPROXY_ENABLE_WEBP_DETECTION: "true"
-  # volumeMounts:
-  #   - name: volume_name
-  #     mountPath: /path/to/my/secret
-  # volumes:
-  #   - name: volume_name
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.txt
-  #         path: name_of_file_in_container.txt
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
   persistence:
-    enabled: true
-    storageClassName: ""
-    annotations: {}
-    size: 10Gi
-    accessModes:
-      - ReadWriteOnce
-    class: ""
+    enabled: false  # Imgproxy doesn't need persistent storage
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 100
+    maxReplicas: 3
     targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
 
-# Kong
+# Kong Gateway - API Gateway and routing
 kong:
-  # Enable kong provisioning
   enabled: true
+  replicaCount: 1
   image:
     repository: kong
+    tag: "3.6.1"
     pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  replicaCount: 1
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  environment:
+    KONG_DATABASE: "off"
+    KONG_DECLARATIVE_CONFIG: "/usr/local/kong/kong.yml"
+    KONG_DNS_ORDER: "LAST,A,CNAME"
+    KONG_PLUGINS: "request-transformer,cors,key-auth,acl,basic-auth"
+    KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: "160k"
+    KONG_NGINX_PROXY_PROXY_BUFFERS: "64 160k"
+    KONG_LOG_LEVEL: "warn"
   service:
     type: ClusterIP
     port: 8000
-  environment:
-    KONG_DATABASE: "off"
-    KONG_DECLARATIVE_CONFIG: /usr/local/kong/kong.yml
-    # https://github.com/supabase/cli/issues/14
-    KONG_DNS_ORDER: LAST,A,CNAME
-    KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
-    KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
-    KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
-    KONG_LOG_LEVEL: warn
   ingress:
     enabled: true
-    className: "nginx"
+    className: "alb"
     annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /
-      # cert-manager.io/cluster-issuer: "letsencrypt-staging"
-      # kubernetes.io/tls-acme: "true"
-    tls: []
-      # Define TLS secret for SSL termination.
-      # This section can be left blank if using cluster certificate manager.
-      # Otherwise, setting this in tandem with certificate manager will overwrite the secret name.
-      # - secretName: example-com-tls
-      #   hosts:
-      #     - example.com
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/group.name: production
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:851725652296:certificate/448e98db-b7cd-4efb-b8d0-94bdf6fb2c6a
+      alb.ingress.kubernetes.io/subnets: subnet-0216a3f2ad3743f9c,subnet-006fa14e9d72b0312,subnet-0d53c9c338fb936c6
     hosts:
-      - host: example.com
+      - host: supabase.stack-ai.jesuspaz.com
         paths:
           - path: /
             pathType: Prefix
-  # volumeMounts:
-  #   - name: volume_name
-  #     mountPath: /path/to/my/secret
-  # volumes:
-  #   - name: volume_name
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.txt
-  #         path: name_of_file_in_container.txt
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
 
-# Analytics
+# Analytics - Logflare for logs and metrics
 analytics:
-  # Enable analytics provisioning
   enabled: true
+  replicaCount: 1
   image:
     repository: supabase/logflare
+    tag: "1.4.0"
     pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  replicaCount: 1
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  environment:
+    LOGFLARE_NODE_HOST: "127.0.0.1"
+    DB_USERNAME: "supabase_admin"
+    DB_PORT: "5432"
+    DB_DRIVER: "postgresql"
+    DB_SSL: "disable"
+    DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
+    DB_SCHEMA: "_analytics"
+    LOGFLARE_SINGLE_TENANT: "true"
+    LOGFLARE_SUPABASE_MODE: "true"
+    FEATURE_FLAG_OVERRIDE: "multibackend=true"
+  bigQuery:
+    enabled: false
   service:
     type: ClusterIP
     port: 4000
-  environment:
-    LOGFLARE_NODE_HOST: 127.0.0.1
-    # Override the database hostname if using external database
-    # DB_HOST: DATABASE.NAMESPACE.svc.cluster.local
-    DB_USERNAME: supabase_admin
-    DB_PORT: 5432
-    DB_DRIVER: postgresql
-    DB_SCHEMA: _analytics
-    LOGFLARE_SINGLE_TENANT: "true"
-    LOGFLARE_SUPABASE_MODE: "true"
-    FEATURE_FLAG_OVERRIDE: multibackend=true
-  # Enable Big Query backend for analytics
-  bigQuery:
-    enabled: false
-    projectId: google-project-id
-    projectNumber: google-project-number
-    gcloudJson: ""
-  # volumeMounts:
-  #   - name: volume_name
-  #     mountPath: /path/to/my/secret
-  # volumes:
-  #   - name: volume_name
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.txt
-  #         path: name_of_file_in_container.txt
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 100
+    maxReplicas: 3
     targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
 
-# Vector
+# Vector - Log collection and processing
 vector:
-  # Enable vector provisioning
   enabled: true
+  replicaCount: 1
   image:
     repository: timberio/vector
+    tag: "0.37.0"
     pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  replicaCount: 1
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
   service:
     type: ClusterIP
     port: 9001
-  # volumeMounts:
-  #   - name: volume_name
-  #     mountPath: /path/to/my/secret
-  # volumes:
-  #   - name: volume_name
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.txt
-  #         path: name_of_file_in_container.txt
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  # Vector requires logs from the control plane to function
+  volumeMounts:
+    - name: pod-logs
+      mountPath: /var/log/pods
+  volumes:
+    - name: pod-logs
+      hostPath:
+        path: /var/log/pods
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 100
+    maxReplicas: 2
     targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
 
-# Functions
+# Functions - Edge Functions runtime
 functions:
-  # Enable functions provisioning
   enabled: true
+  replicaCount: 1
   image:
     repository: supabase/edge-runtime
+    tag: "v1.58.2"
     pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  replicaCount: 1
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-  podAnnotations: {}
-  podSecurityContext: {}
-    # fsGroup: 2000
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  environment:
+    DB_USERNAME: "supabase_functions_admin"
+    DB_PORT: "5432"
+    DB_DRIVER: "postgresql"
+    DB_SSL: "disable"
+    DB_HOST: "supabase.cviyu0s8wh17.us-east-1.rds.amazonaws.com"
   service:
     type: ClusterIP
     port: 9000
-  environment:
-    # Override the database hostname if using external database
-    # DB_HOST: DATABASE.NAMESPACE.svc.cluster.local
-    DB_USERNAME: supabase_functions_admin
-    DB_PORT: 5432
-    DB_DRIVER: postgresql
-    DB_SSL: disable  # disable, allow, prefer, require, verify-ca, verify-full
-  # Mount user functions
-  # volumeMounts:
-  #   - name: my_functions
-  #     mountPath: /home/deno/functions/main/main
-  # volumes:
-  #   - name: my_functions
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.ts
-  #         path: name_of_file_in_container.ts
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
   autoscaling:
     enabled: true
     minReplicas: 1
-    maxReplicas: 100
+    maxReplicas: 5
     targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
 
-# minio
+# Minio - Disabled (using S3 instead)
 minio:
   enabled: false
-  image:
-    repository: minio/minio
-    pullPolicy: IfNotPresent
-    tag: "latest"
-  imagePullSecrets: []
-  replicaCount: 1
-  nameOverride: ""
-  fullnameOverride: ""
-  livenessProbe: {}
-  readinessProbe: {}
+
+# Global settings for all services
+global:
+  # Common service account settings
   serviceAccount:
-    # Specifies whether a service account should be created
     create: true
-    # Annotations to add to the service account
     annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
     name: ""
-  podAnnotations: {}
+  
+  # Common security context
   podSecurityContext: {}
-    # fsGroup: 2000
   securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
-  service:
-    type: ClusterIP
-    port: 9000
-  environment: {}
-  # Mount user functions
-  # volumeMounts:
-  #   - name: my_functions
-  #     mountPath: /home/deno/functions/main/main
-  # volumes:
-  #   - name: my_functions
-  #     secret:
-  #       defaultMode: 733
-  #       secretName: my_secret
-  #       items:
-  #       - key: my_secret.ts
-  #         path: name_of_file_in_container.ts
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-  persistence:
-    enabled: false
-    storageClassName: ""
-    annotations: {}
-    size: 10Gi
-    accessModes:
-      - ReadWriteOnce
-    class: ""
-  autoscaling:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
+  
+  # Common node selection
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  
+  # Common pod settings
+  podAnnotations: {}
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+  
+  # Common probe settings
+  livenessProbe: {}
+  readinessProbe: {}

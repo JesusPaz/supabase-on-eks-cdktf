@@ -11,9 +11,7 @@ spec:
     repoURL: https://github.com/JesusPaz/supabase-on-eks-cdktf
     path: helm/supabase
     targetRevision: HEAD  # Use main branch
-    helm:
-      valueFiles:
-        - values-aws.yaml
+    helm: {}
 
   destination:
     server: https://kubernetes.default.svc
