@@ -20,6 +20,10 @@ spec:
             type: AmazonVPC  # Use AmazonVPC for EKS, keeps VPC CNI for dataplane
           flexVolumePath: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/
         
+        # Disable API server for policy-only mode (not needed)
+        apiServer:
+          enabled: false
+        
         # Only install policy enforcement components
         calicoNetwork:
           bgp: Disabled
