@@ -27,6 +27,8 @@ $$;
 GRANT supabase_auth_admin TO supabase;
 GRANT supabase_storage_admin TO supabase;
 
+-- Note: supabase_admin password will be set by Lambda using environment variable
+
 CREATE EXTENSION IF NOT EXISTS pg_tle;
 GRANT pgtle_admin TO supabase_admin;
 GRANT pgtle_admin TO postgres;

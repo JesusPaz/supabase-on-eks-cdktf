@@ -145,6 +145,12 @@ exports.handler = async (event, context) => {
             await runQueries(db, './sql/init-for-rds/');
             await runQueries(db, './sql/init-scripts/');
             await runQueries(db, './sql/migrations/');
+            
+            // Set supabase_admin password to match master user (needed for Realtime)
+            console.info('Setting supabase_admin password...');
+            await db.query(`ALTER USER supabase_admin PASSWORD '${password}';`);
+            console.info('supabase_admin password configured');
+            
             console.info('Database migrations completed successfully');
             break;
           }
