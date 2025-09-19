@@ -13,16 +13,16 @@ spec:
   - Ingress
   - Egress
   ingress:
-  # Allow traffic from ALB (internet)
+  # Allow traffic from ALB (internet) and any pod in supabase namespace
   - from: []
     ports:
     - protocol: TCP
       port: 8000
-  # Allow traffic from Studio for dashboard access
+  # Allow traffic from any pod in supabase namespace (for testing and inter-service communication)
   - from:
-    - podSelector:
+    - namespaceSelector:
         matchLabels:
-          app.kubernetes.io/name: supabase-studio
+          name: supabase
     ports:
     - protocol: TCP
       port: 8000
