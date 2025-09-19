@@ -426,21 +426,25 @@ analytics:
   replicaCount: 1
   image:
     repository: supabase/logflare
-    tag: "1.4.0"
+    tag: "1.14.2"
     pullPolicy: IfNotPresent
   serviceAccount:
     create: true
     annotations: {}
     name: ""
   environment:
+    # Official docker-compose configuration
     LOGFLARE_NODE_HOST: "127.0.0.1"
+    DB_USERNAME: "supabase_admin"
+    DB_DATABASE: "_supabase"
     DB_PORT: "5432"
-    DB_DRIVER: "postgresql"
-    DB_SSL: "disable"
     DB_SCHEMA: "_analytics"
     LOGFLARE_SINGLE_TENANT: "true"
     LOGFLARE_SUPABASE_MODE: "true"
-    FEATURE_FLAG_OVERRIDE: "multibackend=true"
+    LOGFLARE_MIN_CLUSTER_SIZE: "1"
+    # Backend configuration for PostgreSQL
+    POSTGRES_BACKEND_SCHEMA: "_analytics"
+    LOGFLARE_FEATURE_FLAG_OVERRIDE: "multibackend=true"
   bigQuery:
     enabled: false
   service:

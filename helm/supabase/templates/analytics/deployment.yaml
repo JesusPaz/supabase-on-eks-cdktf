@@ -111,6 +111,8 @@ spec:
             {{- toYaml .Values.analytics.securityContext | nindent 12 }}
           image: "{{ .Values.analytics.image.repository }}:{{ .Values.analytics.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.analytics.image.pullPolicy }}
+          command: ["/bin/sh"]
+          args: ["-c", "export POSTGRES_BACKEND_URL=\"postgresql://supabase_admin:$DB_PASSWORD@$DB_HOST:$DB_PORT/_supabase\" && exec /app/bin/logflare start"]
           env:
             {{- range $key, $value := .Values.analytics.environment }}
             {{- if and (ne $key "DB_SSL") (ne $key "DB_PORT") }}
