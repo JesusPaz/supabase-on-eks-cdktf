@@ -2,13 +2,41 @@
 
 This directory contains the configurations and scripts required to run Supabase inside a Kubernetes cluster.
 
-## Disclamer
+## Database Configuration Options
 
-We use [supabase/postgres](https://hub.docker.com/r/supabase/postgres) to create and manage the Postgres database. This permit you to use replication if needed but you'll have to use the Postgres image provided Supabase or build your own on top of it. You can also choose to use other databases provider like [StackGres](https://stackgres.io/) or [Postgres Operator](https://github.com/zalando/postgres-operator).
+This Helm chart supports **two database configuration modes**:
 
-For the moment we are using a root container to permit the installation of the missing `pgjwt` and `wal2json` extension inside the `initdbScripts`. This is considered a security issue, but you can use your own Postgres image instead with the extension already installed to prevent this. We provide an example of `Dockerfile`for this purpose, you can use [ours](https://hub.docker.com/r/tdeoliv/supabase-bitnami-postgres) or build and host it on your own.
+### 🏢 External Database (Recommended for Production)
+- Use managed databases like Amazon RDS, Google Cloud SQL, or Azure Database
+- Automatic SSL configuration and connection pooling
+- Integration with External Secrets Operator for secure credential management
+- High availability and automated backups
 
-The database configuration we provide is an example using only one master. If you want to go to production, we highly recommend you to use a replicated database.
+### 🔧 Internal Database (Development/Testing)
+- PostgreSQL container running inside Kubernetes
+- Suitable for development, testing, and small deployments
+- Persistent storage with configurable resources
+- Automatic initialization scripts and extensions
+
+See [DATABASE_CONFIG.md](./DATABASE_CONFIG.md) for detailed configuration instructions.
+
+## Quick Start Examples
+
+### External Database (Production)
+```bash
+helm install supabase . -f values-external-db.yaml
+```
+
+### Internal Database (Development)
+```bash
+helm install supabase . -f values-internal-db.yaml
+```
+
+## Disclaimer
+
+When using the internal database option, we use [supabase/postgres](https://hub.docker.com/r/supabase/postgres) to create and manage the Postgres database. This permits you to use replication if needed but you'll have to use the Postgres image provided by Supabase or build your own on top of it. You can also choose to use other database providers like [StackGres](https://stackgres.io/) or [Postgres Operator](https://github.com/zalando/postgres-operator).
+
+For production deployments, we highly recommend using an external managed database service for better reliability, security, and performance.
 
 ## Quickstart
 

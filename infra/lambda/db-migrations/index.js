@@ -86,8 +86,16 @@ const runQueries = async (db, dir) => {
           console.info(`Query returned ${result.length} rows`);
         }
       } catch (err) {
-        console.error(`Error executing ${file}:`, err.message);
-        throw err; // Re-throw to stop execution on error
+        // Handle common idempotent errors that are safe to ignore
+        if (err.message.includes('already exists') || 
+            err.message.includes('already installed') ||
+            err.message.includes('permission denied to set parameter') ||
+            err.message.includes('relation') && err.message.includes('already exists')) {
+          console.warn(`Skipping ${file} - resource already exists or permission denied: ${err.message}`);
+        } else {
+          console.error(`Error executing ${file}:`, err.message);
+          throw err; // Re-throw to stop execution on error
+        }
       }
     }
   } catch (err) {

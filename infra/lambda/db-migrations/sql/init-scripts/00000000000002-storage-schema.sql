@@ -104,7 +104,14 @@ CREATE TABLE IF NOT EXISTS storage.migrations (
   executed_at timestamp DEFAULT current_timestamp
 );
 
-CREATE USER supabase_storage_admin NOINHERIT CREATEROLE LOGIN NOREPLICATION;
+-- Create supabase_storage_admin (idempotent)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'supabase_storage_admin') THEN
+        CREATE USER supabase_storage_admin NOINHERIT CREATEROLE LOGIN NOREPLICATION;
+    END IF;
+END
+$$;
 GRANT ALL PRIVILEGES ON SCHEMA storage TO supabase_storage_admin;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA storage TO supabase_storage_admin;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA storage TO supabase_storage_admin;

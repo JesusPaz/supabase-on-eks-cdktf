@@ -16,26 +16,56 @@ $$;
 alter user supabase_admin with createdb createrole bypassrls;
 grant rds_replication to supabase_admin; -- for RDS
 
--- Supabase replication user
-create user supabase_replication_admin with login;
+-- Supabase replication user (idempotent)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'supabase_replication_admin') THEN
+        CREATE USER supabase_replication_admin WITH LOGIN;
+    END IF;
+END
+$$;
 grant rds_replication to supabase_replication_admin; -- for RDS
 
--- Supabase read-only user
-create role supabase_read_only_user with login bypassrls;
+-- Supabase read-only user (idempotent)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'supabase_read_only_user') THEN
+        CREATE ROLE supabase_read_only_user WITH LOGIN BYPASSRLS;
+    END IF;
+END
+$$;
 grant pg_read_all_data to supabase_read_only_user;
 
 -- Extension namespacing
 create schema if not exists extensions;
 create extension if not exists "uuid-ossp"      with schema extensions;
 create extension if not exists pgcrypto         with schema extensions;
-create extension if not exists pgjwt            with schema extensions;
+-- pgjwt is installed via pg_tle in init-for-rds scripts
+-- create extension if not exists pgjwt            with schema extensions;
 
--- Set up auth roles for the developer
-create role anon                nologin noinherit;
-create role authenticated       nologin noinherit; -- "logged in" user: web_user, app_user, etc
-create role service_role        nologin noinherit bypassrls; -- allow developers to create JWT's that bypass their policies
+-- Set up auth roles for the developer (idempotent)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'anon') THEN
+        CREATE ROLE anon NOLOGIN NOINHERIT;
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'authenticated') THEN
+        CREATE ROLE authenticated NOLOGIN NOINHERIT; -- "logged in" user: web_user, app_user, etc
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'service_role') THEN
+        CREATE ROLE service_role NOLOGIN NOINHERIT BYPASSRLS; -- allow developers to create JWT's that bypass their policies
+    END IF;
+END
+$$;
 
-create user authenticator noinherit;
+-- Create authenticator user (idempotent)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'authenticator') THEN
+        CREATE USER authenticator NOINHERIT;
+    END IF;
+END
+$$;
 grant anon              to authenticator;
 grant authenticated     to authenticator;
 grant service_role      to authenticator;

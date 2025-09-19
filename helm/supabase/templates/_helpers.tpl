@@ -60,3 +60,25 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Database SSL mode configuration
+*/}}
+{{- define "supabase.db.sslmode" -}}
+{{- if .Values.db.enabled }}
+{{- "disable" }}
+{{- else }}
+{{- .Values.db.external.sslmode | default "require" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Database port configuration
+*/}}
+{{- define "supabase.db.port" -}}
+{{- if .Values.db.enabled }}
+{{- .Values.db.service.port | default "5432" }}
+{{- else }}
+{{- .Values.db.external.port | default "5432" }}
+{{- end }}
+{{- end }}

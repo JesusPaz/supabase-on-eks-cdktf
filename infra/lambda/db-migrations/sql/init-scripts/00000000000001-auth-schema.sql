@@ -108,8 +108,14 @@ $$ language sql stable;
 -- usage on auth functions to API roles
 GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role;
 
--- Supabase super admin
-CREATE USER supabase_auth_admin NOINHERIT CREATEROLE LOGIN NOREPLICATION;
+-- Supabase super admin (idempotent)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'supabase_auth_admin') THEN
+        CREATE USER supabase_auth_admin NOINHERIT CREATEROLE LOGIN NOREPLICATION;
+    END IF;
+END
+$$;
 GRANT ALL PRIVILEGES ON SCHEMA auth TO supabase_auth_admin;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA auth TO supabase_auth_admin;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA auth TO supabase_auth_admin;

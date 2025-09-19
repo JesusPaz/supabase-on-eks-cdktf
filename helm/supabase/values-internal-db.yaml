@@ -1,0 +1,143 @@
+# Example configuration for Internal Database
+# Use this for development, testing, or small deployments
+
+# Database configuration - Internal
+db:
+  enabled: true  # Use internal PostgreSQL
+  replicaCount: 1
+  image:
+    repository: supabase/postgres
+    tag: "15.1.0.117"
+    pullPolicy: IfNotPresent
+  environment:
+    POSTGRES_PORT: "5432"
+    POSTGRES_HOST: "0.0.0.0"
+    POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+  service:
+    type: ClusterIP
+    port: 5432
+  persistence:
+    enabled: true
+    size: 20Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  external:
+    # Credentials for internal DB (when not using external secrets)
+    username: "postgres"
+    password: "your-secure-password-here"
+    database: "postgres"
+    port: "5432"
+    sslmode: "disable"  # SSL disabled for internal connections
+
+# Local secrets configuration
+secret:
+  jwt:
+    enabled: false  # Use local secrets
+  db:
+    enabled: false  # Use local secrets for DB
+  analytics:
+    enabled: false
+  dashboard:
+    enabled: false
+  s3:
+    enabled: false
+  smtp:
+    enabled: false
+
+# Studio Application
+studio:
+  enabled: true
+  replicaCount: 1
+
+# Auth Service
+auth:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+
+# REST API
+rest:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+
+# Realtime Service
+realtime:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+
+# Meta Service
+meta:
+  enabled: true
+  replicaCount: 1
+
+# Storage Service (with MinIO for local development)
+storage:
+  enabled: true
+  replicaCount: 1
+  environment:
+    STORAGE_BACKEND: "file"  # Use local file storage instead of S3
+  persistence:
+    enabled: true
+    size: 10Gi
+
+# Analytics
+analytics:
+  enabled: true
+  replicaCount: 1
+
+# Functions
+functions:
+  enabled: true
+  replicaCount: 1
+
+# Kong Gateway
+kong:
+  enabled: true
+  replicaCount: 1
+  ingress:
+    enabled: false  # Disable ingress for local development
+
+# MinIO for local storage
+minio:
+  enabled: true  # Enable MinIO for local file storage
+  replicaCount: 1
+  image:
+    repository: minio/minio
+    tag: "RELEASE.2023-09-04T19-57-37Z"
+    pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  service:
+    type: ClusterIP
+    port: 9000
+  environment:
+    MINIO_ROOT_USER: "minioadmin"
+    MINIO_ROOT_PASSWORD: "minioadmin123"
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80

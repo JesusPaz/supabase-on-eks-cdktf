@@ -1,0 +1,106 @@
+# Example configuration for External Database (RDS, etc.)
+# Use this as a starting point for production deployments
+
+# Database configuration - External
+db:
+  enabled: false  # Use external database
+  external:
+    host: ""  # Will be populated from AWS Secrets Manager
+    port: "5432"
+    database: "postgres"
+    username: "postgres"
+    sslmode: "require"  # SSL required for external DB
+
+# External Secrets configuration
+secret:
+  jwt:
+    enabled: true
+  db:
+    enabled: true  # Use External Secrets for DB credentials
+  analytics:
+    enabled: true
+  dashboard:
+    enabled: true
+  s3:
+    enabled: true
+  smtp:
+    enabled: false
+
+# Studio Application
+studio:
+  enabled: true
+  replicaCount: 1
+
+# Auth Service
+auth:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 5
+
+# REST API
+rest:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 8
+
+# Realtime Service
+realtime:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 5
+
+# Meta Service
+meta:
+  enabled: true
+  replicaCount: 1
+
+# Storage Service (with S3)
+storage:
+  enabled: true
+  replicaCount: 1
+  persistence:
+    enabled: false  # Using S3
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::ACCOUNT:role/supabase-s3-role"
+
+# Analytics
+analytics:
+  enabled: true
+  replicaCount: 1
+
+# Functions
+functions:
+  enabled: true
+  replicaCount: 1
+
+# Kong Gateway
+kong:
+  enabled: true
+  replicaCount: 1
+  ingress:
+    enabled: true
+    className: "alb"
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+    hosts:
+      - host: your-domain.com
+        paths:
+          - path: /
+            pathType: Prefix
+
+# Disable internal components
+minio:
+  enabled: false  # Using S3 instead

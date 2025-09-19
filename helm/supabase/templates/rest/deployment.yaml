@@ -36,9 +36,15 @@ spec:
           imagePullPolicy: {{ .Values.rest.image.pullPolicy }}
           env:
             {{- range $key, $value := .Values.rest.environment }}
+            {{- if and (ne $key "DB_SSL") (ne $key "DB_PORT") }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
+            {{- end }}
+            - name: DB_PORT
+              value: {{ include "supabase.db.port" . | quote }}
+            - name: DB_SSL
+              value: {{ include "supabase.db.sslmode" . | quote }}
             - name: DB_HOST
               {{- if .Values.db.enabled }}
               value: {{ include "supabase.db.fullname" . }}

@@ -13,7 +13,7 @@ spec:
     targetRevision: HEAD  # Use main branch
     helm:
       valueFiles:
-        - values.yaml
+        - values-internal-db.yaml
 
   destination:
     server: https://kubernetes.default.svc
