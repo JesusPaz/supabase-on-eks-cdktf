@@ -422,7 +422,7 @@ kong:
 
 # Analytics - Logflare for logs and metrics
 analytics:
-  enabled: true
+  enabled: false  # Temporarily disabled due to CDC permissions complexity
   replicaCount: 1
   image:
     repository: supabase/logflare
