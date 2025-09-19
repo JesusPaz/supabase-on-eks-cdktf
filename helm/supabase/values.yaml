@@ -94,6 +94,11 @@ studio:
     # Override default project and org
     DEFAULT_PROJECT_ID: "default"
     DEFAULT_ORGANIZATION_ID: "default-org-slug"
+    # Additional self-hosted settings
+    NEXT_PUBLIC_GOTRUE_URL: "https://supabase.stack-ai.jesuspaz.com/auth/v1"
+    NEXT_PUBLIC_REST_URL: "https://supabase.stack-ai.jesuspaz.com/rest/v1"
+    NEXT_PUBLIC_REALTIME_URL: "wss://supabase.stack-ai.jesuspaz.com/realtime/v1"
+    NEXT_PUBLIC_STORAGE_URL: "https://supabase.stack-ai.jesuspaz.com/storage/v1"
   serviceAccount:
     create: true
     annotations: {}
