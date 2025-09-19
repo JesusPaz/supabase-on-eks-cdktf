@@ -85,17 +85,48 @@ spec:
                   key: database
                   {{- end }}
             - name: PG_META_DB_HOST
-              value: $(DB_HOST)
+              {{- if .Values.db.enabled }}
+              value: {{ include "supabase.db.fullname" . }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "supabase.secret.db" . }}
+                  key: host
+              {{- end }}
             - name: PG_META_DB_PORT
-              value: $(DB_PORT)
+              value: {{ include "supabase.db.port" . | quote }}
             - name: PG_META_DB_NAME
-              value: $(DB_NAME)
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.secret.db.secretRef }}
+                  name: {{ .Values.secret.db.secretRef }}
+                  key: {{ .Values.secret.db.secretRefKey.database | default "database" }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.db" . }}
+                  key: database
+                  {{- end }}
             - name: PG_META_DB_USER
-              value: $(DB_USER)
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.secret.db.secretRef }}
+                  name: {{ .Values.secret.db.secretRef }}
+                  key: {{ .Values.secret.db.secretRefKey.username | default "username" }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.db" . }}
+                  key: username
+                  {{- end }}
             - name: PG_META_DB_PASSWORD
-              value: $(DB_PASSWORD)
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.secret.db.secretRef }}
+                  name: {{ .Values.secret.db.secretRef }}
+                  key: {{ .Values.secret.db.secretRefKey.password | default "password" }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.db" . }}
+                  key: password
+                  {{- end }}
             - name: PG_META_DB_SSL_MODE
-              value: $(DB_SSL)
+              value: {{ include "supabase.db.sslmode" . | quote }}
           {{- with .Values.meta.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
