@@ -38,15 +38,5 @@ spec:
     - protocol: TCP
       port: 3000
   egress:
-  # Allow connection to RDS database
+  # Allow ALL egress traffic - never restrict outbound
   - to: []
-    ports:
-    - protocol: TCP
-      port: 5432
-  # Allow DNS resolution
-  - to: []
-    ports:
-    - protocol: UDP
-      port: 53
-    - protocol: TCP
-      port: 53

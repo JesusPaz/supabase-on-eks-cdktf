@@ -27,20 +27,5 @@ spec:
     - protocol: TCP
       port: 8000
   egress:
-  # Allow Kong to reach all Supabase services
-  - to:
-    - podSelector:
-        matchLabels:
-          app.kubernetes.io/instance: supabase
-  # Allow DNS resolution
+  # Allow ALL egress traffic - never restrict outbound
   - to: []
-    ports:
-    - protocol: UDP
-      port: 53
-    - protocol: TCP
-      port: 53
-  # Allow HTTPS for external services
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 443
