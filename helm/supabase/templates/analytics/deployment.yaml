@@ -43,7 +43,15 @@ spec:
                   key: host
               {{- end }}
             - name: DB_USER
-              value: {{ .Values.analytics.environment.DB_USERNAME | quote }}
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.secret.db.secretRef }}
+                  name: {{ .Values.secret.db.secretRef }}
+                  key: {{ .Values.secret.db.secretRefKey.username | default "username" }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.db" . }}
+                  key: username
+                  {{- end }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
