@@ -179,15 +179,6 @@ data:
               - /realtime/v1/
         plugins:
           - name: cors
-          - name: key-auth
-            config:
-              hide_credentials: false
-          - name: acl
-            config:
-              hide_groups_header: true
-              allow:
-                - admin
-                - anon
     {{- end }}
     {{- if .Values.storage.enabled }}
       - name: storage-v1
