@@ -261,7 +261,17 @@ data:
               - /api/platform/pg-meta/
         plugins:
           - name: cors
-          - name: basic-auth
-            config:
-              hide_credentials: true
+          # Self-hosted: no auth on platform compatibility route
+      # Explicitly strip the default project-ref segment used by self-hosted Studio
+      - name: platform-pg-meta-default
+        _comment: "Platform API (default): /api/platform/pg-meta/default/* -> http://{{ include "supabase.meta.fullname" . }}:{{ .Values.meta.service.port }}/*"
+        url: http://{{ include "supabase.meta.fullname" . }}:{{ .Values.meta.service.port }}/
+        routes:
+          - name: platform-pg-meta-default-all
+            strip_path: true
+            paths:
+              - /api/platform/pg-meta/default/
+        plugins:
+          - name: cors
+          # Self-hosted: no auth on platform compatibility route
 {{- end }}
