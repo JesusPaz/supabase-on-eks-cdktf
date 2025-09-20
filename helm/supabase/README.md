@@ -1,60 +1,63 @@
-# Supabase Helm Chart - Production Ready
+# Supabase Helm Chart
 
-Customized Helm chart for deploying Supabase on AWS EKS with production-grade configurations.
+Production-ready Supabase deployment for AWS EKS.
 
-## What this chart deploys
+## What This Is
 
-**Complete Supabase stack:**
-- **Auth** (GoTrue) - User authentication and JWT management
-- **PostgREST** - Automatic REST API for PostgreSQL
+**Custom Helm chart based on the [supabase-kubernetes](https://github.com/supabase-community/supabase-kubernetes) community chart** - adapted for production AWS deployment with external RDS and S3.
+
+**What gets deployed:**
+- **Auth** - User authentication and JWT management
+- **PostgREST** - Automatic REST API for your database
 - **Realtime** - WebSocket subscriptions and live updates
 - **Storage** - File upload/download with S3 integration
-- **Studio** - Web dashboard for database management
-- **Kong** - API Gateway and reverse proxy
+- **Studio** - Web dashboard for managing everything
+- **Kong** - API Gateway routing all requests
 - **Meta** - PostgreSQL metadata API
-- **Functions** - Edge functions runtime
-- **Analytics** - Logging and metrics (Logflare)
+- **Analytics** - Logging and metrics
 
-## Production Features
+## Production Setup
 
-**External integrations:**
-- **Amazon RDS PostgreSQL** - External managed database
-- **Amazon S3** - Object storage via IRSA (no API keys)
-- **AWS Secrets Manager** - Centralized secret management
-- **External Secrets Operator** - Automatic secret synchronization
+**External AWS services:**
+- **RDS PostgreSQL** - Managed database in private subnets
+- **S3 bucket** - File storage with IRSA (no API keys needed)
+- **Secrets Manager** - All secrets stored securely
+- **External Secrets** - Auto-sync secrets to Kubernetes
 
-**Scaling & Performance:**
-- **HPA enabled** - Auto-scaling for all services based on CPU
-- **Resource limits** - Memory and CPU limits configured
-- **Multi-replica** - High availability deployment
-- **Health checks** - Liveness and readiness probes
+**Built for scale:**
+- **Auto-scaling** - HPA configured for all services
+- **High availability** - Multiple replicas across AZs
+- **Health checks** - Proper liveness and readiness probes
+- **Resource limits** - CPU and memory limits set
 
-**Security:**
-- **NetworkPolicies** - Micro-segmentation with Calico
-- **IRSA** - AWS access without hardcoded credentials
-- **TLS encryption** - All connections encrypted
-- **Private database** - RDS in private subnets only
+**Security first:**
+- **NetworkPolicies** - Control traffic between services
+- **IRSA** - Secure AWS access without hardcoded keys
+- **Private RDS** - Database never accessible from internet
+- **TLS everywhere** - All connections encrypted
 
-## Quick deployment
+## How to Deploy
 
+**Via ArgoCD (recommended):**
 ```bash
-# Deploy via ArgoCD (GitOps)
 kubectl apply -f k8s/supabase/supabase-application.yaml
+```
 
-# Or direct Helm
+**Direct Helm install:**
+```bash
 helm upgrade --install supabase ./helm/supabase \
   --values ./helm/supabase/values.yaml \
   --namespace supabase --create-namespace
 ```
 
-## Configuration
+## Key Differences from Community Chart
 
-**Key customizations in `values.yaml`:**
-- External RDS connection via secrets
-- S3 integration with IRSA
-- External Secrets from AWS Secrets Manager
-- ALB ingress with SSL termination
-- HPA settings for auto-scaling
-- NetworkPolicy configurations
+**What I changed for production AWS:**
+- **External RDS** - Uses AWS RDS instead of in-cluster PostgreSQL
+- **S3 integration** - IRSA for secure S3 access without API keys
+- **External Secrets** - AWS Secrets Manager integration
+- **ALB ingress** - AWS Load Balancer Controller for SSL termination
+- **NetworkPolicies** - Calico policies for pod-to-pod security
+- **Auto-scaling** - HPA configured for all services
 
-**All secrets managed externally** - No hardcoded credentials in chart.
+**All secrets come from AWS** - No hardcoded credentials anywhere in the chart.

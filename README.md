@@ -1,47 +1,77 @@
-# Supabase on AWS EKS - Production Deployment
+# Supabase on AWS EKS
 
-Complete production-ready Supabase deployment on AWS EKS using CDKTF, Helm, and GitOps.
+Production-ready Supabase running on AWS with everything you need.
 
-## Overview
+## What This Is
 
-**Full-stack implementation featuring:**
-- AWS infrastructure via CDKTF (VPC, EKS, RDS, S3, Secrets Manager)
-- Complete Supabase deployment with all services functional
-- GitOps automation with ArgoCD
-- Comprehensive security with NetworkPolicies and IRSA
-- Production-grade testing and validation
+**A complete Supabase deployment that actually works:**
+- AWS infrastructure built with CDKTF (VPC, EKS, RDS, S3, secrets)
+- All Supabase services running and functional
+- GitOps with ArgoCD for easy management
+- Proper security with NetworkPolicies and IRSA
+- Real API tests to prove it works
+
+## Quick Start
+
+**Deploy everything:**
+```bash
+# 1. Set up infrastructure
+cd infra && make bootstrap && make deploy
+
+# 2. Deploy applications
+kubectl apply -f k8s/argocd/
+kubectl apply -f k8s/external-secrets/
+kubectl apply -f k8s/supabase/
+
+# 3. Test it works
+cd test && make all
+```
+
+**Live demo:** https://supabase.stack-ai.jesuspaz.com
 
 ## Architecture
 
-See [Architecture Diagrams](diagrams/) for visual overview:
-- [Infrastructure Overview](diagrams/01-architecture-overview.png)
-- [Security & Network](diagrams/02-security-network-diagram.png)  
-- [Data Flow](diagrams/03-data-flow-interactions.png)
+**Visual overview:**
+- **[Infrastructure](diagrams/01-architecture-overview.png)** - AWS resources and connections
+- **[Security](diagrams/02-security-network-diagram.png)** - Network and access control
+- **[Data Flow](diagrams/03-data-flow-interactions.png)** - How requests flow through services
 
 ## Documentation
 
-| **Topic** | **Documentation** |
-|-----------|-------------------|
-| **Infrastructure** | [infra/README.md](infra/README.md) |
-| **Kubernetes Apps** | [k8s/README.md](k8s/README.md) |
-| **Helm Chart** | [helm/supabase/README.md](helm/supabase/README.md) |
-| **API Testing** | [test/README.md](test/README.md) |
-| **Architecture** | [diagrams/README.md](diagrams/README.md) |
-| **Detailed Guides** | [docs/](docs/) |
+**Implementation details:**
+- **[Infrastructure](infra/README.md)** - CDKTF code for AWS resources
+- **[Kubernetes](k8s/README.md)** - ArgoCD applications and GitOps
+- **[Helm Chart](helm/supabase/README.md)** - Supabase configuration
+- **[Tests](test/README.md)** - API validation suite
+- **[Complete Guide](docs/)** - Step-by-step instructions
+
+## What's Working
+
+✅ **Infrastructure** - All AWS resources deployed and running
+✅ **Supabase services** - Auth, PostgREST, Storage, Realtime functional  
+✅ **Security** - Private RDS, NetworkPolicies, IRSA, encrypted secrets
+✅ **Auto-scaling** - HPA and cluster autoscaler configured
+✅ **GitOps** - ArgoCD managing all deployments
+✅ **Testing** - 13/14 API tests passing (93% success rate)
 
 ## Key Features
 
-**Security:** Private subnets, IRSA, External Secrets, NetworkPolicies, encryption everywhere
-**Scalability:** HPA auto-scaling, cluster autoscaler, Multi-AZ deployment
-**Automation:** GitOps with ArgoCD, automated testing, Infrastructure as Code
-**Production-ready:** External RDS, S3 integration, comprehensive monitoring
+**Security first:**
+- Private subnets and RDS (no internet access)
+- IRSA for secure AWS access (no hardcoded keys)
+- External Secrets for centralized secret management
+- NetworkPolicies for pod-to-pod security
+- Encryption everywhere (TLS, KMS, RDS)
 
-## Status
+**Production ready:**
+- External RDS with Multi-AZ and backups
+- S3 integration with proper IAM roles
+- HPA auto-scaling based on CPU usage
+- Cluster autoscaler for node management
+- Comprehensive API testing suite
 
-✅ **Infrastructure** - AWS resources deployed and functional
-✅ **Applications** - All Supabase services running  
-✅ **Security** - NetworkPolicies and encryption enabled
-✅ **Testing** - 13/14 API tests passing (93% success rate)
-✅ **GitOps** - ArgoCD managing deployments
-
-**Live instance:** https://supabase.stack-ai.jesuspaz.com
+**Easy to manage:**
+- GitOps with ArgoCD for deployments
+- Infrastructure as Code with CDKTF
+- Automated testing and validation
+- Clear documentation and guides

@@ -19,6 +19,23 @@
 - Configuring Realtime with proper tenant setup
 - Connecting each service to the external database correctly
 
+### Trade-offs Made
+
+**Security vs. simplicity:**
+- **NetworkPolicies** - Allowed all egress traffic instead of strict micro-segmentation for demo simplicity
+- **EKS API endpoint** - Left public for easier access (would be private in production)
+- **SSL verification** - Disabled for Storage S3 connections to resolve certificate issues quickly
+
+**Cost vs. performance:**
+- **RDS over Aurora** - Chose standard RDS for cost savings, sacrificing Aurora's advanced features
+- **t3.large instances** - Cost-optimized over performance-optimized instance types
+- **Single region** - No multi-region setup to keep costs down
+
+**Completeness vs. time:**
+- **Analytics disabled** - CDC permissions complexity vs. 2-3 day timeline
+- **Basic monitoring** - CloudWatch only, no Prometheus/Grafana setup
+- **Manual secret creation** - Some Kubernetes secrets created manually vs. full automation
+
 ### What Worked Well
 
 **Standard DevOps stuff was straightforward:**
@@ -62,4 +79,16 @@
 3. **Iterative testing** - Incremental fixes and validation
 4. **Documentation creation** - Comprehensive testing and verification
 
-**Result:** Successfully adapted open-source application for enterprise production environment with external managed services.
+### Architecture Decisions & Justifications
+
+**Why these trade-offs made sense:**
+- **Security simplifications** - Focused on core functionality over perfect security for demo
+- **Cost optimizations** - Chose affordable options to demonstrate scalability concepts
+- **Time management** - Prioritized working core services over 100% feature completeness
+
+**What this demonstrates:**
+- **Real-world decision making** - Balancing multiple constraints
+- **Production thinking** - Understanding enterprise vs. demo requirements
+- **Technical judgment** - Knowing when to simplify vs. when to invest time
+
+**Result:** Successfully adapted open-source application for enterprise production environment with external managed services, demonstrating both technical skills and practical decision-making.
