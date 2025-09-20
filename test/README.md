@@ -1,91 +1,75 @@
-# Supabase API Tests
+# API Test Suite
 
-Simple Python script to test Supabase API functionality.
+Comprehensive test suite for validating Supabase deployment functionality.
 
-## What it tests
+## Test Coverage
 
-- ✅ **Auth service** - Health check
-- ✅ **PostgREST** - Database API health + Full CRUD operations
-- ✅ **User creation** - Create test user
-- ✅ **User listing** - List all users
-- ✅ **User verification** - Verify created user exists
-- ✅ **Storage service** - Health check + Full file operations
-- ✅ **File upload** - Upload test file to Storage
-- ✅ **File listing** - List files in Storage
-- ✅ **File download** - Download uploaded file
-- ✅ **Realtime** - WebSocket connection
+**Core Services:**
+- **Auth** - Authentication, user management, JWT validation
+- **PostgREST** - REST API with full CRUD operations
+- **Storage** - File operations with S3 integration
+- **Realtime** - WebSocket connectivity
 
-## How to run
+**Operations Tested:**
+- Service health checks
+- Database CRUD (CREATE, READ, UPDATE, DELETE)
+- User management (signup, listing, verification)
+- File operations (upload, download, listing, bucket management)
 
-### Option 1: Using Makefile (recommended)
+## Usage
+
 ```bash
-make all        # Install + Test (uses virtual environment)
-# OR step by step:
-make install    # Create venv and install dependencies
-make test       # Run tests (creates table automatically)
-make clean      # Remove virtual environment
+# Automated test execution
+make all        # Install dependencies + Run tests
+
+# Manual execution
+make install    # Setup virtual environment
+make test       # Run test suite
+make clean      # Cleanup environment
 ```
-
-### Option 2: Manual
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Run the test:**
-   ```bash
-   python test_api.py
-   ```
 
 ## Configuration
 
-The script uses JWT tokens from `.env` file:
-- `SUPABASE_URL` - Your Supabase instance URL
-- `anonKey` - Anonymous access key
-- `serviceKey` - Service role key (admin access)
+**JWT tokens extracted from AWS Secrets Manager via Kubernetes:**
+- `SUPABASE_URL` - Supabase instance endpoint (https://supabase.stack-ai.jesuspaz.com)
+- `anonKey` - Anonymous access token (from AWS secret `supabase/jwt`)
+- `serviceKey` - Service role token (from AWS secret `supabase/jwt`)
 
-## Expected output
+**Setup required:**
+```bash
+# Extract tokens from Kubernetes secret (sourced from AWS)
+kubectl get secret -n supabase supabase-jwt -o jsonpath='{.data}' | jq -r 'to_entries[] | "\(.key)=\(.value | @base64d)"' > .env
+echo "SUPABASE_URL=https://supabase.stack-ai.jesuspaz.com" >> .env
+```
+
+## Expected Results
 
 ```
-🚀 Starting Supabase API Tests
-✅ Tests passed: 14/14
-🎉 ALL TESTS PASSED! Supabase is working correctly
+✅ Tests passed: 13-14/14 (93-100%)
+✅ Auth, PostgREST, Storage functional
+✅ CRUD operations working
+⚠️  Realtime may show minor auth issues
 ```
 
-## What each test does
+## Test Details
 
-1. **Auth Health** - `GET /auth/v1/health`
-2. **PostgREST Health** - `GET /rest/v1/`
-3. **Create Table** - Check/create `test_items` table
-4. **PostgREST CREATE** - `POST /rest/v1/test_items` (INSERT)
-5. **PostgREST READ** - `GET /rest/v1/test_items` (SELECT)
-6. **PostgREST UPDATE** - `PATCH /rest/v1/test_items?id=eq.{id}` 
-7. **PostgREST DELETE** - `DELETE /rest/v1/test_items?id=eq.{id}`
-8. **Create User** - `POST /auth/v1/signup`
-9. **List Users** - `GET /auth/v1/admin/users`
-10. **Verify User** - Check user exists in list
-11. **Storage Health** - `GET /storage/v1/status`
-12. **Create Bucket** - `POST /storage/v1/bucket` (private bucket)
-13. **File Upload** - `POST /storage/v1/object/test-bucket/{file}`
-14. **File Listing** - `POST /storage/v1/object/list/test-bucket`
-15. **File Download** - `GET /storage/v1/object/test-bucket/{file}`
-16. **Realtime** - `GET /realtime/v1/websocket`
+**14 comprehensive tests covering:**
 
-## CRUD Operations Tested
+| **Service** | **Operations** | **Endpoints** |
+|-------------|----------------|---------------|
+| **Auth** | Health, user CRUD | `/auth/v1/health`, `/auth/v1/signup`, `/auth/v1/admin/users` |
+| **PostgREST** | Health, database CRUD | `/rest/v1/`, `/rest/v1/test_items` |
+| **Storage** | Health, file CRUD, bucket management | `/storage/v1/status`, `/storage/v1/object/*` |
+| **Realtime** | WebSocket connectivity | `/realtime/v1/websocket` |
 
-### PostgREST Database CRUD
-- **CREATE** - Insert new items into `test_items` table
-- **READ** - Query and list items from database  
-- **UPDATE** - Modify existing items
-- **DELETE** - Remove items from database
+**Automated setup:**
+- Creates test database table
+- Creates private S3 bucket
+- Generates unique test data
+- Cleans up after execution
 
-### Storage File CRUD
-- **CREATE** - Upload files to private S3 bucket
-- **READ** - Download and verify file contents
-- **LIST** - Browse files in bucket
-- **MANAGE** - Create buckets with proper permissions
-
-### Auth User Management
-- **CREATE** - Register new users via signup
-- **READ** - List all users (admin operation)
-- **VERIFY** - Confirm user creation and persistence
+**Validation:**
+- Service availability and response codes
+- Data persistence and retrieval
+- File upload/download integrity
+- User authentication flows

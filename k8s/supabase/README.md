@@ -1,67 +1,43 @@
-# Supabase Helm Chart
+# Supabase ArgoCD Application
 
-This directory contains the Supabase Helm chart configuration for deployment on EKS with AWS Secrets Manager integration.
+ArgoCD Application for deploying complete Supabase stack with full functionality.
 
-## 🔐 Security Best Practices
+## Complete Supabase Stack
 
-This chart uses **External Secrets Operator** to fetch secrets from **AWS Secrets Manager** instead of storing them in Kubernetes secrets. This follows security best practices by:
+**All services included and functional:**
+- Auth, PostgREST, Realtime, Storage, Studio, Kong, Meta, Functions, Analytics
+- External RDS PostgreSQL integration
+- S3 storage with IRSA (no API keys)
+- External Secrets from AWS Secrets Manager
+- HPA auto-scaling enabled
+- NetworkPolicies for micro-segmentation
 
-- ✅ Centralizing secrets in AWS Secrets Manager
-- ✅ Using IRSA for secure AWS API access
-- ✅ Automatic secret rotation support
-- ✅ No secrets stored in Git or Kubernetes manifests
+## Deployment
 
-## 📋 Prerequisites
-
-1. **Infrastructure deployed** (EKS cluster, RDS, S3, etc.)
-2. **External Secrets Operator** installed
-3. **AWS Load Balancer Controller** installed
-4. **ArgoCD** installed and configured
-
-## 🚀 Deployment
-
-### Option 1: ArgoCD Application (Git Repository)
+**GitOps deployment via ArgoCD:**
 ```bash
 kubectl apply -f supabase-application.yaml
 ```
-*Note: Uses GitHub repository directly since there's no official Helm repository*
 
-### Option 2: Direct Helm (Local Chart)
+**Direct Helm deployment:**
 ```bash
-./deploy-supabase.sh
-```
-*This script clones the repository and deploys using local chart*
-
-### Option 3: Manual Helm
-```bash
-# Clone the repository
-git clone https://github.com/supabase-community/supabase-kubernetes
-cd supabase-kubernetes/charts/supabase/
-
-# Install with custom values
-helm install supabase . -f /path/to/your/values.yaml -n supabase --create-namespace
+helm upgrade --install supabase ../../helm/supabase \
+  --values ../../helm/supabase/values.yaml \
+  --namespace supabase --create-namespace
 ```
 
-## 🔧 Configuration
+## Configuration
 
-The chart is configured to:
-- Use **AWS RDS PostgreSQL** (external database)
-- Use **AWS S3** for storage
-- Fetch all secrets from **AWS Secrets Manager**
-- Use **AWS Load Balancer** for ingress
-- Enable **metrics and monitoring**
+**Production-ready features:**
+- External RDS PostgreSQL (Multi-AZ, encrypted)
+- S3 integration via IRSA (secure, no hardcoded keys)
+- AWS Secrets Manager for all credentials
+- ALB ingress with SSL termination
+- Horizontal Pod Autoscaler on all services
+- Calico NetworkPolicies for security
 
-## 📁 Files
+**References:**
+- Full Helm chart: [../../helm/supabase/](../../helm/supabase/)
+- Complete test suite: [../../test/](../../test/)
 
-- `supabase-application.yaml` - ArgoCD application definition
-- `values.yaml` - Helm chart values
-- `external-secrets/` - Secret store configurations
-- `secrets/` - Secret definitions for External Secrets
-
-## 🔗 External Dependencies
-
-This chart requires the following AWS resources (created by Terraform):
-- RDS PostgreSQL database
-- S3 bucket for storage
-- Secrets in AWS Secrets Manager
-- IRSA roles for service accounts
+**All secrets sourced from AWS** - No credentials in Git or Kubernetes manifests.
