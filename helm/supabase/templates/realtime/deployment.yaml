@@ -151,10 +151,10 @@ spec:
                 secretKeyRef:
                   {{- if .Values.secret.jwt.secretRef }}
                   name: {{ .Values.secret.jwt.secretRef }}
-                  key: {{ .Values.secret.jwt.secretRefKey.serviceKey | default "serviceKey" }}
+                  key: {{ .Values.secret.jwt.secretRefKey.secret | default "secret" }}
                   {{- else }}
                   name: {{ include "supabase.secret.jwt" . }}
-                  key: serviceKey
+                  key: secret
                   {{- end }}
           {{- with .Values.realtime.livenessProbe }}
           livenessProbe:
