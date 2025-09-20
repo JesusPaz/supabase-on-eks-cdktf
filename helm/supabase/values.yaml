@@ -222,7 +222,7 @@ realtime:
     ENABLE_TAILSCALE: "false"
     DNS_NODES: "''"
     # Official docker-compose variables
-    DB_ENC_KEY: "supabaserealtime"
+    DB_ENC_KEY: "0123456789abcdef0123456789abcdef"
     SEED_SELF_HOST: "true"
     RUN_JANITOR: "true"
     APP_NAME: "realtime"
